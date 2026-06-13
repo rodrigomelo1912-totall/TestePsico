@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Mapeamento psicológico baseado na Espiral de Valores.">
+  <title>Mapeamento Psicológico | Totall</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="ambient ambient-one"></div>
+  <div class="ambient ambient-two"></div>
+
+  <header class="site-header">
+    <a class="brand" href="#" aria-label="Totall - início">
+      <span class="brand-logo"><img src="assets/logo-totall.png" alt="Totall"></span>
+      <small>PROPRIEDADE <strong>INTELECTUAL</strong></small>
+    </a>
+    <div class="header-meta">
+      <span class="eyebrow">Espiral de Valores</span>
+      <span id="header-person"></span>
+    </div>
+  </header>
+
+  <main>
+    <section id="welcome-screen" class="screen active">
+      <div class="hero-grid">
+        <div class="hero-copy">
+          <span class="eyebrow">Mapeamento psicológico</span>
+          <h1>Entenda os valores que orientam suas decisões.</h1>
+          <p>Distribua exatamente <strong>12 pontos</strong> entre as seis afirmações de cada bloco. Ao final, você verá sua matriz de valores e uma leitura inicial do perfil.</p>
+          <div class="facts">
+            <div><strong>10</strong><span>blocos</span></div>
+            <div><strong>60</strong><span>afirmações</span></div>
+            <div><strong>120</strong><span>pontos totais</span></div>
+          </div>
+        </div>
+
+        <form id="profile-form" class="glass-card intro-card">
+          <div class="step-label">Antes de começar</div>
+          <h2>Conte um pouco sobre você</h2>
+          <label>
+            Nome completo
+            <input id="name" name="name" type="text" autocomplete="name" placeholder="Como você gostaria de aparecer?" required>
+          </label>
+          <label>
+            Cargo ou função
+            <input id="role" name="role" type="text" placeholder="Ex.: Gerente Comercial" required>
+          </label>
+          <label>
+            Contexto do cargo
+            <textarea id="role-context" name="roleContext" rows="3" placeholder="Descreva brevemente suas responsabilidades e desafios."></textarea>
+          </label>
+          <button class="primary-button" type="submit">Começar mapeamento <span>→</span></button>
+          <p class="privacy-note">Suas respostas ficam somente neste navegador.</p>
+        </form>
+      </div>
+    </section>
+
+    <section id="quiz-screen" class="screen">
+      <div class="quiz-shell">
+        <div class="quiz-topbar">
+          <div>
+            <span class="eyebrow">Questionário</span>
+            <strong id="progress-label">Bloco 1 de 10</strong>
+          </div>
+          <div class="progress-track"><span id="progress-bar"></span></div>
+          <button id="save-exit" class="ghost-button" type="button">Salvar e sair</button>
+        </div>
+
+        <article class="question-card">
+          <div class="question-heading">
+            <div>
+              <span id="question-kicker" class="step-label"></span>
+              <h2 id="question-title"></h2>
+            </div>
+            <div id="points-ring" class="points-ring">
+              <strong id="points-used">0</strong>
+              <span>de 12 pontos</span>
+            </div>
+          </div>
+          <p class="question-help">Quanto mais uma afirmação representa você, mais pontos ela deve receber. É permitido atribuir zero.</p>
+          <div id="options-list" class="options-list"></div>
+          <p id="validation-message" class="validation-message" aria-live="polite"></p>
+          <div class="question-actions">
+            <button id="previous-button" class="secondary-button" type="button">← Anterior</button>
+            <button id="next-button" class="primary-button" type="button">Próximo bloco <span>→</span></button>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section id="results-screen" class="screen">
+      <div class="results-shell">
+        <div class="results-hero">
+          <div>
+            <span class="eyebrow">Seu resultado</span>
+            <h1 id="result-title"></h1>
+            <p id="result-summary"></p>
+          </div>
+          <div class="result-actions">
+            <button id="print-button" class="secondary-button" type="button">Imprimir / PDF</button>
+            <button id="restart-button" class="ghost-button" type="button">Refazer teste</button>
+          </div>
+        </div>
+
+        <div class="results-grid">
+          <section class="glass-card matrix-card">
+            <div class="section-title">
+              <div><span class="step-label">Matriz</span><h2>Distribuição de valores</h2></div>
+              <strong id="total-score">120 pontos</strong>
+            </div>
+            <div id="matrix-chart" class="matrix-chart"></div>
+          </section>
+
+          <section class="glass-card radar-card">
+            <div class="section-title">
+              <div><span class="step-label">Leitura visual</span><h2>Mapa do perfil</h2></div>
+            </div>
+            <div id="radar-chart" class="radar-chart"></div>
+          </section>
+        </div>
+
+        <section class="analysis-section">
+          <div class="section-title">
+            <div><span class="step-label">Análise inicial</span><h2>Como este perfil tende a operar</h2></div>
+          </div>
+          <div id="analysis-cards" class="analysis-cards"></div>
+        </section>
+
+        <section class="glass-card detail-section">
+          <div class="section-title">
+            <div><span class="step-label">Detalhamento</span><h2>Leitura por nível da espiral</h2></div>
+          </div>
+          <div id="level-details" class="level-details"></div>
+        </section>
+
+        <p class="disclaimer">Esta leitura é uma ferramenta de autoconhecimento e desenvolvimento, não um diagnóstico clínico ou psicológico.</p>
+      </div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
