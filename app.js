@@ -61,7 +61,11 @@ const QUESTIONS = [
 ];
 
 const state = {
-  profile: { name: "", role: "", roleContext: "" },
+  profile: {
+    name: "", roleArea: "", responsibilities: "", timeFocus: "", challenge: "",
+    difficultDecision: "", pressure: "", strengthsDevelopment: "", goals: ""
+  },
+  introCurrent: 0,
   current: 0,
   answers: QUESTIONS.map(() => Object.fromEntries(Object.keys(COLORS).map(key => [key, 0])))
 };
@@ -75,7 +79,33 @@ function showScreen(id) {
 }
 
 function persist() {
+  captureProfile();
   localStorage.setItem("totall-profile-map", JSON.stringify(state));
+}
+
+const profileFields = {
+  name: "name",
+  roleArea: "role-area",
+  responsibilities: "responsibilities",
+  timeFocus: "time-focus",
+  challenge: "challenge",
+  difficultDecision: "difficult-decision",
+  pressure: "pressure",
+  strengthsDevelopment: "strengths-development",
+  goals: "goals"
+};
+
+function captureProfile() {
+  Object.entries(profileFields).forEach(([key, id]) => {
+    const field = $(id);
+    if (field) state.profile[key] = field.value.trim();
+  });
+}
+
+function populateProfile() {
+  Object.entries(profileFields).forEach(([key, id]) => {
+    if ($(id)) $(id).value = state.profile[key] || "";
+  });
 }
 
 function restore() {
@@ -85,12 +115,36 @@ function restore() {
     const data = JSON.parse(saved);
     if (data.profile && Array.isArray(data.answers) && data.answers.length === QUESTIONS.length) {
       Object.assign(state, data);
-      $("name").value = state.profile.name || "";
-      $("role").value = state.profile.role || "";
-      $("role-context").value = state.profile.roleContext || "";
+      state.profile.roleArea ||= state.profile.role || "";
+      state.profile.responsibilities ||= state.profile.roleContext || "";
+      state.introCurrent = Math.max(0, Math.min(2, state.introCurrent || 0));
+      populateProfile();
       $("header-person").textContent = state.profile.name || "";
+      renderIntro();
     }
   } catch (_) { localStorage.removeItem("totall-profile-map"); }
+}
+
+function renderIntro() {
+  document.querySelectorAll(".intro-slide").forEach((slide, index) => slide.classList.toggle("active", index === state.introCurrent));
+  document.querySelectorAll(".intro-dots span").forEach((dot, index) => dot.classList.toggle("active", index === state.introCurrent));
+  $("intro-progress-label").textContent = `Etapa ${state.introCurrent + 1} de 3`;
+  $("intro-title").textContent = ["Seu contexto profissional", "Sua rotina e suas decisões", "Seu jeito de agir e seus objetivos"][state.introCurrent];
+  $("intro-previous").disabled = state.introCurrent === 0;
+  $("intro-next").hidden = state.introCurrent === 2;
+  $("intro-submit").hidden = state.introCurrent !== 2;
+}
+
+function validateIntroSlide() {
+  const slide = document.querySelector(`.intro-slide[data-intro-slide="${state.introCurrent}"]`);
+  const requiredFields = [...slide.querySelectorAll("[required]")];
+  const invalid = requiredFields.find(field => !field.value.trim());
+  if (invalid) {
+    invalid.focus();
+    invalid.reportValidity();
+    return false;
+  }
+  return true;
 }
 
 function blockTotal(index = state.current) {
@@ -145,7 +199,7 @@ function renderResults() {
   const first = ranked[0], second = ranked[1], lowest = ranked[ranked.length - 1];
   const firstName = state.profile.name.split(" ")[0] || "Seu";
   $("result-title").textContent = `${firstName}, seu núcleo é ${first.name} + ${second.name}.`;
-  $("result-summary").textContent = `${first.core} aparece como motor principal, apoiado por ${second.core.toLowerCase()}. Seu cargo como ${state.profile.role} adiciona um contexto importante a esta leitura.`;
+  $("result-summary").textContent = `${first.core} aparece como motor principal, apoiado por ${second.core.toLowerCase()}. Seu contexto como ${state.profile.roleArea} adiciona uma perspectiva importante a esta leitura.`;
   $("total-score").textContent = `${data.reduce((sum, item) => sum + item.points, 0)} pontos`;
   $("matrix-chart").innerHTML = data.map(item => `<div class="matrix-row">
     <div class="matrix-label"><span class="color-dot" style="--color:${item.hex}"></span>${item.name}</div>
@@ -180,13 +234,13 @@ function renderRadar(data) {
 function renderAnalysis(ranked) {
   const [first, second, third] = ranked;
   const lowest = ranked[ranked.length - 1];
-  const roleContext = state.profile.roleContext ? ` Considerando o contexto informado — ${state.profile.roleContext} —, vale observar como esse motor aparece nas decisões reais.` : "";
+  const roleContext = state.profile.challenge ? ` Considerando seu desafio atual — ${state.profile.challenge} —, vale observar como esse motor aparece nas decisões reais.` : "";
   const cards = [
     { tag: "Leitura geral", title: `${first.name} como motor primário`, color: first.hex, text: `Seu perfil tende a operar primeiro por ${first.core.toLowerCase()}. ${first.description}${roleContext}` },
     { tag: "Combinação dominante", title: `${first.name} + ${second.name}`, color: second.hex, text: `Juntos, estes níveis somam ${first.percent + second.percent}% do perfil. A combinação une ${first.core.toLowerCase()} com ${second.core.toLowerCase()}, moldando seu estilo mais recorrente.` },
     { tag: "Recurso de apoio", title: `${third.name} entra conforme o contexto`, color: third.hex, text: `${third.name} aparece como terceira força. É um recurso disponível para sustentar as duas tendências dominantes quando a situação pede ${third.core.toLowerCase()}.` },
     { tag: "Ponto de desenvolvimento", title: `Ativar mais o ${lowest.name}`, color: lowest.hex, text: `O nível menos pontuado não é uma fraqueza, mas um canal menos espontâneo. Desenvolver ${lowest.core.toLowerCase()} pode ampliar seu repertório de liderança e decisão.` },
-    { tag: "No trabalho", title: `Potência no cargo de ${state.profile.role}`, color: first.hex, text: `Sua maior potência tende a surgir em ambientes que valorizam ${first.core.toLowerCase()} e permitem usar ${second.core.toLowerCase()} como complemento.` },
+    { tag: "No trabalho", title: `Potência em ${state.profile.roleArea}`, color: first.hex, text: `Sua maior potência tende a surgir em ambientes que valorizam ${first.core.toLowerCase()} e permitem usar ${second.core.toLowerCase()} como complemento.` },
     { tag: "Atenção prática", title: "Equilibrar intenção e impacto", color: lowest.hex, text: `Sob pressão, os níveis dominantes podem ser usados em excesso. Antes de uma decisão importante, pergunte como alguém com ${lowest.name} alto enxergaria a mesma situação.` }
   ];
   $("analysis-cards").innerHTML = cards.map(card => `<article class="analysis-card" style="--card-color:${card.color}"><span>${card.tag}</span><h3>${card.title}</h3><p>${card.text}</p></article>`).join("");
@@ -194,11 +248,29 @@ function renderAnalysis(ranked) {
 
 $("profile-form").addEventListener("submit", (event) => {
   event.preventDefault();
-  state.profile = { name: $("name").value.trim(), role: $("role").value.trim(), roleContext: $("role-context").value.trim() };
+  if (!validateIntroSlide()) return;
+  captureProfile();
   $("header-person").textContent = state.profile.name;
   persist();
   renderQuestion();
   showScreen("quiz-screen");
+});
+
+$("profile-form").addEventListener("input", persist);
+
+$("intro-next").addEventListener("click", () => {
+  if (!validateIntroSlide()) return;
+  captureProfile();
+  state.introCurrent = Math.min(2, state.introCurrent + 1);
+  renderIntro();
+  persist();
+});
+
+$("intro-previous").addEventListener("click", () => {
+  captureProfile();
+  state.introCurrent = Math.max(0, state.introCurrent - 1);
+  renderIntro();
+  persist();
 });
 
 $("options-list").addEventListener("click", (event) => {
@@ -255,3 +327,4 @@ $("restart-button").addEventListener("click", () => {
 });
 
 restore();
+renderIntro();

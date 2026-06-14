@@ -84,6 +84,17 @@ button { cursor: pointer; }
 }
 .intro-card { padding: 38px; }
 .intro-card h2 { font: 800 27px/1.2 "Manrope", sans-serif; margin: 10px 0 28px; }
+.intro-progress { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+.intro-progress > div:first-child { display: grid; gap: 4px; }
+.intro-progress strong { color: var(--ink-soft); font-size: 11px; }
+.intro-dots { display: flex; gap: 6px; }
+.intro-dots span { width: 7px; height: 7px; border-radius: 50%; background: rgba(9,47,61,.14); transition: .25s ease; }
+.intro-dots span.active { width: 22px; border-radius: 99px; background: var(--accent); }
+.intro-slide { display: none; }
+.intro-slide.active { display: block; animation: reveal .35s ease both; }
+.intro-actions { display: flex; gap: 9px; margin-top: 4px; }
+.intro-actions .primary-button { flex: 1; margin-top: 0; }
+.intro-actions .secondary-button { flex: 0 0 auto; }
 label { display: grid; gap: 8px; margin-bottom: 18px; color: var(--ink); font-size: 13px; font-weight: 700; }
 input, textarea {
   width: 100%;
@@ -112,7 +123,7 @@ input:focus, textarea:focus { border-color: var(--accent); background: #fff; box
 .secondary-button { background: #fff; color: var(--ink); border-color: var(--line); }
 .secondary-button:hover, .ghost-button:hover { border-color: var(--accent); color: var(--accent-dark); }
 .ghost-button { background: transparent; color: var(--ink-soft); border-color: var(--line); }
-.intro-card .primary-button { width: 100%; margin-top: 4px; }
+.intro-card .primary-button { width: 100%; }
 
 .quiz-shell { padding: 20px 0 90px; }
 .quiz-topbar { display: grid; grid-template-columns: auto 1fr auto; gap: 26px; align-items: center; margin: 20px 0 28px; }

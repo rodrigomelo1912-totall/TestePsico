@@ -40,21 +40,65 @@
         </div>
 
         <form id="profile-form" class="glass-card intro-card">
-          <div class="step-label">Antes de começar</div>
-          <h2>Conte um pouco sobre você</h2>
-          <label>
-            Nome completo
-            <input id="name" name="name" type="text" autocomplete="name" placeholder="Como você gostaria de aparecer?" required>
-          </label>
-          <label>
-            Cargo ou função
-            <input id="role" name="role" type="text" placeholder="Ex.: Gerente Comercial" required>
-          </label>
-          <label>
-            Contexto do cargo
-            <textarea id="role-context" name="roleContext" rows="3" placeholder="Descreva brevemente suas responsabilidades e desafios."></textarea>
-          </label>
-          <button class="primary-button" type="submit">Começar mapeamento <span>→</span></button>
+          <div class="intro-progress">
+            <div>
+              <span class="step-label">Antes de começar</span>
+              <strong id="intro-progress-label">Etapa 1 de 3</strong>
+            </div>
+            <div class="intro-dots" aria-hidden="true"><span class="active"></span><span></span><span></span></div>
+          </div>
+          <h2 id="intro-title">Seu contexto profissional</h2>
+
+          <div class="intro-slide active" data-intro-slide="0">
+            <label>
+              Qual é seu nome completo?
+              <input id="name" name="name" type="text" autocomplete="name" placeholder="Digite seu nome completo" required>
+            </label>
+            <label>
+              Qual é seu cargo e em qual área você trabalha?
+              <input id="role-area" name="roleArea" type="text" placeholder="Ex.: Gerente Comercial — Vendas" required>
+            </label>
+            <label>
+              Quais são suas principais responsabilidades?
+              <textarea id="responsibilities" name="responsibilities" rows="3" placeholder="Descreva as entregas sob sua responsabilidade" required></textarea>
+            </label>
+          </div>
+
+          <div class="intro-slide" data-intro-slide="1">
+            <label>
+              O que mais ocupa seu tempo no trabalho?
+              <textarea id="time-focus" name="timeFocus" rows="3" placeholder="Atividades, reuniões ou demandas mais frequentes" required></textarea>
+            </label>
+            <label>
+              Qual é seu maior desafio profissional hoje?
+              <textarea id="challenge" name="challenge" rows="3" placeholder="Conte o principal desafio que está enfrentando" required></textarea>
+            </label>
+            <label>
+              Conte uma decisão difícil que você tomou recentemente.
+              <textarea id="difficult-decision" name="difficultDecision" rows="3" placeholder="Qual foi a situação e como você decidiu?" required></textarea>
+            </label>
+          </div>
+
+          <div class="intro-slide" data-intro-slide="2">
+            <label>
+              Como você costuma agir quando está sob pressão?
+              <textarea id="pressure" name="pressure" rows="3" placeholder="Descreva sua reação mais comum" required></textarea>
+            </label>
+            <label>
+              Quais são seus principais pontos fortes e o que precisa melhorar?
+              <textarea id="strengths-development" name="strengthsDevelopment" rows="3" placeholder="Inclua forças e aspectos de desenvolvimento" required></textarea>
+            </label>
+            <label>
+              Onde você quer chegar profissionalmente nos próximos anos?
+              <textarea id="goals" name="goals" rows="3" placeholder="Compartilhe seus objetivos profissionais" required></textarea>
+            </label>
+          </div>
+
+          <div class="intro-actions">
+            <button id="intro-previous" class="secondary-button" type="button" disabled>← Voltar</button>
+            <button id="intro-next" class="primary-button" type="button">Avançar <span>→</span></button>
+            <button id="intro-submit" class="primary-button" type="submit" hidden>Começar mapeamento <span>→</span></button>
+          </div>
           <p class="privacy-note">Suas respostas ficam somente neste navegador.</p>
         </form>
       </div>
