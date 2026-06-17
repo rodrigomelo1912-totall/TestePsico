@@ -7,6 +7,66 @@ const COLORS = {
   G: { name: "Amarelo", hex: "#efcf62", core: "Pensamento sistêmico e visão integradora", description: "Enxerga interdependências, acolhe diferentes perspectivas e adapta soluções ao contexto." }
 };
 
+const LEVEL_WORK_STYLE = {
+  B: { gift: "Cria pertencimento e preserva vínculos importantes.", risk: "Pode proteger demais o conhecido e evitar rupturas necessárias.", lowRisk: "Pode faltar ritual de pertencimento, celebração e vínculo com a história do grupo.", lever: "Use rituais de alinhamento, confiança e memória cultural." },
+  C: { gift: "Decide com coragem, confronta obstáculos e sustenta ritmo.", risk: "Pode acelerar antes de escutar ou gerar tensão em perfis sensíveis.", lowRisk: "Pode faltar confronto, firmeza pública e velocidade em decisões impopulares.", lever: "Canalize a força em decisões com critérios claros e combinados prévios." },
+  D: { gift: "Organiza, disciplina, dá previsibilidade e protege o padrão.", risk: "Pode prender energia em excesso de regra, controle ou burocracia.", lowRisk: "Pode faltar rotina, documentação, cadência e sustentação disciplinada da execução.", lever: "Transforme processo em trilho para execução, não em trava para resultado." },
+  E: { gift: "Move crescimento, performance, mérito e foco em resultado.", risk: "Pode medir pessoas só por entrega e pressionar além do ponto saudável.", lowRisk: "Pode faltar ambição explícita, métrica de avanço e disputa saudável por performance.", lever: "Conecte meta, indicador, autonomia e reconhecimento explícito." },
+  F: { gift: "Amplia escuta, colaboração, cuidado e inteligência relacional.", risk: "Pode adiar conflitos ou dissolver clareza em busca de consenso.", lowRisk: "Pode gerar distância emocional, baixa escuta percebida e desgaste silencioso do time.", lever: "Crie conversas estruturadas de feedback, reconhecimento e segurança psicológica." },
+  G: { gift: "Enxerga sistemas, interdependências e lugares de potência.", risk: "Pode analisar pessoas como peças do sistema e subestimar emoção.", lowRisk: "Pode faltar leitura de interdependências, adaptação contextual e visão de segunda ordem.", lever: "Use mapas, hipóteses e experimentos curtos para ajustar o sistema humano." }
+};
+
+const ROLE_ARCHETYPES = {
+  executive: {
+    title: "Liderança Estratégica",
+    label: "Orquestrador organizacional",
+    match: ["ceo", "diretor", "diretora", "presidente", "socio", "sócio", "fundador", "head", "gestor", "gestora", "gerente", "lider", "líder"],
+    ideal: { E: 24, G: 22, D: 17, C: 15, F: 12, B: 10 },
+    dimensionWeights: { strategy: .26, growth: .22, execution: .20, system: .20, people: .12 },
+    sentence: "Transforma visão em direção, organiza prioridades e mobiliza pessoas para resultado."
+  },
+  commercial: {
+    title: "Crescimento Comercial",
+    label: "Construtor de receita",
+    match: ["comercial", "vendas", "marketing", "negocio", "negócio", "growth", "receita", "relacionamento", "cliente"],
+    ideal: { E: 28, C: 18, G: 17, F: 14, D: 13, B: 10 },
+    dimensionWeights: { growth: .32, execution: .22, strategy: .18, people: .18, system: .10 },
+    sentence: "Converte oportunidade em negócio, sustenta energia de mercado e aprende rápido com o cliente."
+  },
+  operations: {
+    title: "Operações e Processos",
+    label: "Arquiteto de execução",
+    match: ["operacao", "operação", "processo", "projeto", "produto", "qualidade", "atendimento", "implantacao", "implantação"],
+    ideal: { D: 24, G: 22, E: 18, C: 14, F: 12, B: 10 },
+    dimensionWeights: { system: .28, execution: .24, strategy: .18, growth: .16, people: .14 },
+    sentence: "Transforma complexidade em fluxo, reduz ruído operacional e entrega consistência."
+  },
+  people: {
+    title: "Gestão de Pessoas",
+    label: "Desenvolvedor de talentos",
+    match: ["rh", "pessoas", "gente", "cultura", "talentos", "treinamento", "desenvolvimento humano"],
+    ideal: { F: 26, G: 20, B: 18, D: 15, E: 12, C: 9 },
+    dimensionWeights: { people: .34, system: .22, strategy: .16, execution: .14, growth: .14 },
+    sentence: "Lê energia humana, desenvolve talentos e cria segurança para performance sustentável."
+  },
+  technical: {
+    title: "Tecnologia e Sistemas",
+    label: "Integrador técnico",
+    match: ["tecnologia", "ti", "dev", "dados", "produto digital", "engenharia", "sistemas", "software"],
+    ideal: { G: 27, D: 20, E: 18, C: 12, F: 12, B: 11 },
+    dimensionWeights: { system: .32, strategy: .22, execution: .20, growth: .14, people: .12 },
+    sentence: "Enxerga arquitetura, integra partes e transforma tecnologia em alavanca de escala."
+  },
+  specialist: {
+    title: "Especialista Profissional",
+    label: "Executor especialista",
+    match: [],
+    ideal: { D: 21, E: 20, G: 19, F: 15, C: 13, B: 12 },
+    dimensionWeights: { execution: .24, system: .22, strategy: .20, growth: .18, people: .16 },
+    sentence: "Entrega com profundidade técnica, consistência e evolução gradual de impacto."
+  }
+};
+
 const QUESTIONS = [
   { title: "Pessoas que me conhecem melhor diriam que sou...", options: [
     ["G", "Individualista, seguindo minhas próprias regras."], ["D", "Responsável e estável, com convicções, crenças e princípios fortes."],
@@ -193,6 +253,40 @@ function totals() {
   })).map(item => ({ ...item, percent: Math.round((item.points / 120) * 100) }));
 }
 
+const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+const byCode = (data) => Object.fromEntries(data.map(item => [item.code, item]));
+const pct = (map, code) => map[code]?.percent || 0;
+
+function detectRoleArchetype() {
+  const text = [
+    state.profile.roleArea, state.profile.responsibilities, state.profile.timeFocus,
+    state.profile.challenge, state.profile.difficultDecision, state.profile.goals
+  ].join(" ").toLowerCase();
+  return Object.values(ROLE_ARCHETYPES).find(archetype => archetype.match.some(word => text.includes(word))) || ROLE_ARCHETYPES.specialist;
+}
+
+function weightedDimension(map, weights) {
+  const raw = Object.entries(weights).reduce((sum, [code, weight]) => sum + pct(map, code) * weight, 0);
+  return Number(clamp(4.2 + raw * .22, 4, 9.8).toFixed(1));
+}
+
+function professionalMethod(data) {
+  const map = byCode(data);
+  const archetype = detectRoleArchetype();
+  const dimensions = {
+    strategy: { label: "Estratégia e visão", benchmark: 8.2, score: weightedDimension(map, { G: .45, E: .35, D: .10, C: .10 }), analysis: "Lê contexto, define direção e antecipa impactos." },
+    growth: { label: "Crescimento e negócio", benchmark: 8.0, score: weightedDimension(map, { E: .55, G: .25, C: .15, D: .05 }), analysis: "Converte energia em meta, ganho e evolução mensurável." },
+    execution: { label: "Decisão e execução", benchmark: 8.0, score: weightedDimension(map, { C: .35, D: .30, E: .25, G: .10 }), analysis: "Decide, sustenta ritmo e remove obstáculos." },
+    system: { label: "Gestão de sistema", benchmark: 7.8, score: weightedDimension(map, { G: .45, D: .25, E: .20, F: .10 }), analysis: "Organiza interdependências, prioriza e otimiza o todo." },
+    people: { label: "Gestão de pessoas", benchmark: 8.0, score: weightedDimension(map, { F: .45, B: .25, G: .15, D: .10, E: .05 }), analysis: "Cuida de vínculos, escuta sinais e cria adesão humana." }
+  };
+  const roleScore = Object.entries(archetype.dimensionWeights).reduce((sum, [key, weight]) => sum + dimensions[key].score * 10 * weight, 0);
+  const colorGap = Object.entries(archetype.ideal).reduce((sum, [code, ideal]) => sum + Math.abs(pct(map, code) - ideal), 0);
+  const fit = Math.round(clamp((roleScore * .72) + ((100 - colorGap * 1.15) * .28), 35, 98));
+  const fitLabel = fit >= 88 ? "Fit natural" : fit >= 76 ? "Fit forte com ajustes" : fit >= 64 ? "Fit promissor" : "Fit em construção";
+  return { archetype, dimensions, fit, fitLabel };
+}
+
 function renderResults() {
   const data = totals();
   const ranked = [...data].sort((a, b) => b.points - a.points);
@@ -208,11 +302,125 @@ function renderResults() {
   </div>`).join("");
   renderRadar(data);
   renderAnalysis(ranked);
+  renderProfessionalReport(data, ranked);
   $("level-details").innerHTML = ranked.map((item, index) => `<article class="level-card">
     <div class="level-head"><div class="level-name"><span class="color-dot" style="--color:${item.hex}"></span>${item.name}</div><strong>${item.percent}%</strong></div>
     <p>${item.description} ${index < 2 ? "Como nível dominante, tende a aparecer com frequência nas escolhas e no modo de trabalhar." : index === ranked.length - 1 ? "Como nível menos presente, pode indicar um canal que exige mais intenção consciente." : "Aparece como recurso complementar, ativado conforme o contexto."}</p>
   </article>`).join("");
   persist();
+}
+
+function renderDonut(data, title) {
+  let offset = 0;
+  const slices = data.map(item => {
+    const value = item.percent;
+    const dash = `${value} ${100 - value}`;
+    const slice = `<circle r="15.915" cx="18" cy="18" fill="transparent" stroke="${item.hex}" stroke-width="7.5" stroke-dasharray="${dash}" stroke-dashoffset="${25 - offset}" />`;
+    offset += value;
+    return slice;
+  }).join("");
+  return `<svg viewBox="0 0 36 36" role="img" aria-label="${title}">${slices}<circle r="9" cx="18" cy="18" fill="#080d16"/><text x="18" y="17.1" text-anchor="middle">DNA</text><text x="18" y="21.3" text-anchor="middle">PRO</text></svg>`;
+}
+
+function colorLegend(data) {
+  return data.map(item => `<li><span style="--color:${item.hex}"></span><strong>${item.name}</strong><em>${item.percent}%</em><small>${item.core}</small></li>`).join("");
+}
+
+function renderProfessionalReport(data, ranked) {
+  const method = professionalMethod(data);
+  const top = ranked[0], second = ranked[1], third = ranked[2], low = ranked[ranked.length - 1];
+  const name = state.profile.name || "Profissional";
+  const role = state.profile.roleArea || method.archetype.title;
+  const flow = [
+    { label: "Enxerga", text: `${top.name} aponta onde você começa: ${LEVEL_WORK_STYLE[top.code].gift.toLowerCase()}` },
+    { label: "Conecta", text: `${second.name} mostra como você conecta prioridades, pessoas e recursos.` },
+    { label: "Decide", text: `${third.name} vira recurso de decisão quando há pressão e ambiguidade.` },
+    { label: "Posiciona", text: `Use o contexto informado para colocar energia no lugar de maior impacto.` },
+    { label: "Escala", text: `Resultado sustentável vem quando ${top.name} não sufoca ${low.name}.` }
+  ];
+  const dimensionRows = Object.values(method.dimensions).map(item => {
+    const status = item.score >= item.benchmark + .5 ? "Acima da média" : item.score >= item.benchmark - .4 ? "Aderente" : "Oportunidade";
+    return `<tr><td>${item.label}</td><td><strong class="${status === "Oportunidade" ? "warn" : "good"}">${item.score}/10</strong></td><td>${item.benchmark.toFixed(1)}</td><td>${status}. ${item.analysis}</td></tr>`;
+  }).join("");
+  const insights = [
+    { title: `Combo dominante: ${top.name} + ${second.name}`, text: `Essa dupla explica o modo como você naturalmente transforma intenção em comportamento profissional.` },
+    { title: `Ponto cego provável: ${low.name}`, text: `${LEVEL_WORK_STYLE[low.code].lowRisk} A chave é tratar esse nível como prática estruturada, não como traço espontâneo.` },
+    { title: `Match com a cadeira: ${method.archetype.title}`, text: `${method.archetype.sentence} O fit melhora quando suas responsabilidades reais exigem as dimensões mais bem pontuadas.` },
+    { title: "Design thinking aplicado", text: "Observe uma situação, formule hipótese de comportamento, teste uma intervenção curta, colete feedback e ajuste o sistema." }
+  ];
+
+  $("professional-report").innerHTML = `
+    <div class="pro-hero">
+      <div>
+        <span class="pro-kicker">Fit psicológico com a cadeira</span>
+        <h2>${name}</h2>
+        <p class="pro-role">${role}</p>
+        <p>${method.archetype.sentence}</p>
+      </div>
+      <div class="fit-orb">
+        <span>Fit com a cadeira</span>
+        <strong>${method.fit}%</strong>
+        <em>${method.fitLabel}</em>
+      </div>
+    </div>
+
+    <div class="pro-summary">
+      <p>Seu perfil combina <strong>${top.name}</strong>, <strong>${second.name}</strong> e <strong>${third.name}</strong>. Em termos profissionais, isso indica que sua performance tende a crescer quando a cadeira permite usar ${top.core.toLowerCase()}, apoiado por ${second.core.toLowerCase()}.</p>
+    </div>
+
+    <div class="pro-grid">
+      <section class="pro-card pro-profile-card">
+        <h3>Seu perfil na espiral</h3>
+        <div class="pro-profile-layout">
+          <div class="pro-donut">${renderDonut(data, "Seu perfil profissional na espiral")}</div>
+          <ul class="pro-legend">${colorLegend(data)}</ul>
+        </div>
+      </section>
+      <section class="pro-card">
+        <h3>Leitura principal</h3>
+        <p>Você atua como <strong>${method.archetype.label}</strong>. O valor dominante define o impulso inicial; o segundo valor mostra como você organiza esse impulso; o menor valor revela onde a cadeira pode exigir desenvolvimento consciente.</p>
+      </section>
+      <section class="pro-card pro-strength">
+        <h3>Seus pontos fortes</h3>
+        <ul>${[top, second, third].map(item => `<li><strong>${item.name}</strong><span>${LEVEL_WORK_STYLE[item.code].gift}</span></li>`).join("")}</ul>
+      </section>
+      <section class="pro-card pro-attention">
+        <h3>Seu ponto de atenção</h3>
+        <p><strong>${low.name} em menor presença</strong> pode aparecer como lacuna em situações que exigem ${low.core.toLowerCase()}.</p>
+        <p><strong>O risco:</strong> ${LEVEL_WORK_STYLE[low.code].lowRisk}</p>
+        <p><strong>A chave:</strong> ${LEVEL_WORK_STYLE[low.code].lever}</p>
+      </section>
+    </div>
+
+    <section class="pro-flow">
+      <h3>Como seu perfil gera resultado</h3>
+      <div>${flow.map((item, index) => `<article><b>${index + 1}</b><strong>${item.label}</strong><p>${item.text}</p></article>`).join("")}</div>
+      <p class="superpower">Seu superpoder: transformar padrão de valores em comportamento profissional observável.</p>
+    </section>
+
+    <div class="pro-lower-grid">
+      <section class="pro-card">
+        <h3>Avaliação por dimensão</h3>
+        <table class="dimension-table"><thead><tr><th>Dimensão</th><th>Sua nota</th><th>Benchmark</th><th>Análise</th></tr></thead><tbody>${dimensionRows}</tbody></table>
+      </section>
+      <section class="pro-card pro-insights">
+        <h3>Insights que poucos veem</h3>
+        ${insights.map(item => `<article><strong>${item.title}</strong><p>${item.text}</p></article>`).join("")}
+      </section>
+    </div>
+
+    <section class="pro-synthesis">
+      <div>
+        <h3>Síntese executiva</h3>
+        <p>Você não é apenas a soma das cores. Você é o modo como essas forças aparecem diante da cadeira, da pressão, das pessoas e do resultado. A evolução profissional não está em mudar seu perfil, mas em aprender quando intensificar, dosar ou complementar cada valor.</p>
+      </div>
+      <div>
+        <span>Fit</span>
+        <strong>${method.fit}%</strong>
+        <em>${method.archetype.label}</em>
+      </div>
+    </section>
+  `;
 }
 
 function renderRadar(data) {
