@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Verium: conheça seus valores, conecte seu perfil ao contexto profissional e construa sua rota de desenvolvimento.">
+  <meta name="description" content="Perfil psicológico pela Espiral de Valores: explore a distribuição das cores e os cruzamentos das suas respostas.">
   <meta name="theme-color" content="#0b1936">
-  <title>Perfil & Potencial | Verium</title>
+  <title>Perfil Psicológico | Verium</title>
   <link rel="icon" href="assets/verium-symbol.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="styles.css?v=verium-1">
+  <link rel="stylesheet" href="styles.css?v=espiral-2">
 </head>
 <body>
   <a class="skip-link" href="#main-content">Ir para o conteúdo</a>
@@ -15,19 +15,19 @@
     <a class="brand" href="#main-content" aria-label="Verium CFO / HUB">
       <img src="assets/logo-verium.svg" alt="Verium CFO / HUB" width="184" height="50">
     </a>
-    <span class="header-title">Pessoas, contexto e desenvolvimento</span>
+    <span class="header-title">Perfil psicológico · Espiral de Valores</span>
     <div class="header-meta"><span id="header-person"></span><button id="method-button" class="text-button" type="button">Como funciona <span aria-hidden="true">↗</span></button></div>
   </header>
 
   <div class="workspace">
     <aside class="journey-sidebar" aria-label="Sua jornada">
-      <div class="sidebar-intro"><span class="eyebrow">Verium / Perfil & Potencial</span><p>Conhecer seu jeito.<br><span>Ampliar suas possibilidades.</span></p></div>
+      <div class="sidebar-intro"><span class="eyebrow">Verium / Perfil psicológico</span><p>Conhecer seus valores.<br><span>Compreender suas escolhas.</span></p></div>
       <ol class="journey-steps">
         <li class="active" data-journey="0"><span class="journey-number">01</span><div>Seu contexto<small>Cargo e responsabilidades</small></div></li>
         <li data-journey="1"><span class="journey-number">02</span><div>Suas decisões<small>Rotina e desafios</small></div></li>
         <li data-journey="2"><span class="journey-number">03</span><div>Seu horizonte<small>Forças e objetivos</small></div></li>
         <li data-journey="3"><span class="journey-number">04</span><div>Seus valores<small id="journey-quiz-label">10 blocos de reflexão</small></div></li>
-        <li data-journey="4"><span class="journey-number">↗</span><div>Sua rota<small>Perfil e desenvolvimento</small></div></li>
+        <li data-journey="4"><span class="journey-number">↗</span><div>Seu perfil<small>Cores e cruzamentos</small></div></li>
       </ol>
       <div class="sidebar-note"><svg viewBox="0 0 200 70" aria-hidden="true"><path d="M5 50 C45 50 35 15 80 15 S130 55 160 30 L195 6"/><circle r="4"><animateMotion dur="7s" repeatCount="indefinite" path="M5 50 C45 50 35 15 80 15 S130 55 160 30 L195 6"/></circle></svg><strong>Uma reflexão de cada vez.</strong><p>Considere como você age no cotidiano, não como gostaria de ser visto.</p><small>Suas respostas ficam neste navegador.</small></div>
     </aside>
@@ -35,13 +35,14 @@
     <section id="welcome-screen" class="screen active">
       <div class="hero-grid">
         <div class="hero-copy">
-          <span class="eyebrow">O ponto de partida / Autoconhecimento profissional</span>
-          <h1>Seu jeito de agir.<br><em>Seu próximo movimento.</em></h1>
-          <p>Conheça os valores que orientam suas escolhas e conecte essa leitura ao seu momento profissional. Primeiro, conte um pouco sobre você.</p>
+          <span class="eyebrow">Autoconhecimento / Espiral de Valores</span>
+          <h1>O que importa para você.<br><em>Como isso orienta suas escolhas.</em></h1>
+          <p>Explore seu perfil pela distribuição de valores, pelas combinações entre as cores e pelas respostas que tornam essa leitura única.</p>
+          <button id="spiral-button" class="spiral-intro-button" type="button"><span class="spiral-intro-icon" aria-hidden="true">◎</span><span><strong>O que é a Espiral de Valores?</strong><small>Entenda a teoria e o significado das cores</small></span><span aria-hidden="true">↗</span></button>
           <div class="facts">
             <div><strong>01</strong><span>Contexto</span></div>
             <div><strong>02</strong><span>Valores</span></div>
-            <div><strong>03</strong><span>Rota de evolução</span></div>
+            <div><strong>03</strong><span>Leitura do perfil</span></div>
           </div>
         </div>
 
@@ -145,15 +146,15 @@
 
     <section id="results-screen" class="screen">
       <nav class="report-nav" aria-label="Capítulos do relatório">
-        <div class="report-nav-inner"><div class="report-links"><a href="#panorama">01 <span>Panorama</span></a><a href="#leitura">02 <span>Seu jeito</span></a><a href="#professional-report">03 <span>Contexto</span></a><a href="#development-route">04 <span>Sua rota</span></a></div><div class="report-controls"><button id="motion-toggle" class="text-button" type="button" aria-pressed="false">Pausar movimento</button><button id="print-button" class="primary-button" type="button">Imprimir / PDF <span aria-hidden="true">↗</span></button></div></div>
+        <div class="report-nav-inner"><div class="report-links"><a href="#panorama">01 <span>Panorama</span></a><a href="#leitura">02 <span>Padrões</span></a><a href="#color-crossings">03 <span>Cruzamentos</span></a><a href="#answer-evidence">04 <span>Respostas</span></a></div><div class="report-controls"><button id="motion-toggle" class="text-button" type="button" aria-pressed="false">Pausar movimento</button><button id="print-button" class="primary-button" type="button">Imprimir / PDF <span aria-hidden="true">↗</span></button></div></div>
         <div class="reading-progress" aria-hidden="true"><span id="reading-progress-fill"></span></div>
       </nav>
       <section class="report-cover">
         <div class="report-container cover-grid">
-          <div><span class="eyebrow">Verium / Relatório de perfil profissional</span><h1>O seu potencial.<br><em>Uma nova perspectiva.</em></h1><p id="cover-summary"></p><div class="cover-person"><strong id="cover-name"></strong><span id="cover-role"></span></div></div>
+          <div><span class="eyebrow">Verium / Perfil psicológico · Leitura exploratória</span><h1>Seus valores.<br><em>As conexões que revelam.</em></h1><p id="cover-summary"></p><div class="cover-person"><strong id="cover-name"></strong><span id="cover-role"></span></div></div>
           <div class="cover-visual"><div id="cover-donut" class="cover-donut"></div><p>Seis perspectivas. Um perfil único.</p></div>
         </div>
-        <div class="report-container cover-bottom"><div class="cover-facts"><div><strong>10<span>/10</span></strong><small>blocos concluídos</small></div><div><strong>120</strong><small>pontos distribuídos</small></div><div><strong>6</strong><small>dimensões de valores</small></div></div><a href="#panorama">Explore sua rota de evolução <span aria-hidden="true">↓</span></a></div>
+        <div class="report-container cover-bottom"><div class="cover-facts"><div><strong>10<span>/10</span></strong><small>blocos concluídos</small></div><div><strong>120</strong><small>pontos distribuídos</small></div><div><strong>6</strong><small>perspectivas de valores</small></div></div><a href="#panorama">Explore as conexões do seu perfil <span aria-hidden="true">↓</span></a></div>
       </section>
       <div class="results-shell">
         <div id="panorama" class="results-hero chapter">
@@ -188,7 +189,7 @@
 
         <section id="leitura" class="analysis-section chapter">
           <div class="section-title">
-            <div><span class="step-label">02 / Reconhecer padrões</span><h2>O que te move.<br><em>Como isso aparece no trabalho.</em></h2></div>
+            <div><span class="step-label">02 / Reconhecer padrões</span><h2>O que suas respostas mostram.<br><em>O que vale compreender.</em></h2></div>
           </div>
           <div id="analysis-cards" class="analysis-cards"></div>
         </section>
@@ -201,11 +202,11 @@
           <div id="level-details" class="level-details"></div>
         </details>
 
-        <section id="professional-report" class="professional-report"></section>
-        <section id="development-route" class="development-route chapter"></section>
+        <section id="color-crossings" class="profile-chapter chapter"></section>
+        <section id="answer-evidence" class="profile-chapter chapter"></section>
 
         <p class="disclaimer">Esta leitura é uma ferramenta de autoconhecimento e desenvolvimento, não um diagnóstico clínico ou psicológico.</p>
-        <footer class="report-footer"><img src="assets/logo-verium.svg" alt="Verium CFO / HUB" width="150" height="41"><p>Perfil & Potencial<br><span id="report-date"></span></p></footer>
+        <footer class="report-footer"><img src="assets/logo-verium.svg" alt="Verium CFO / HUB" width="150" height="41"><p>Perfil psicológico · Espiral de Valores<br><span id="report-date"></span></p></footer>
       </div>
     </section>
   </main>
@@ -213,12 +214,24 @@
 
   <dialog id="method-dialog" aria-labelledby="method-title">
     <div class="dialog-heading"><span class="eyebrow">Verium / O método</span><button id="close-method" class="secondary-button" type="button" aria-label="Fechar explicação">Fechar</button></div>
-    <h2 id="method-title">Conhecer. Conectar. Experimentar.</h2>
-    <ol class="method-list"><li><strong>Comece pelo contexto.</strong><p>Três etapas com três perguntas sobre seu trabalho, suas decisões e seus objetivos.</p></li><li><strong>Distribua seus valores.</strong><p>Dez blocos com seis afirmações. Distribua 12 pontos inteiros em cada bloco, totalizando 120. É permitido atribuir zero.</p></li><li><strong>Transforme reflexão em ação.</strong><p>Explore a matriz, as hipóteses sobre seu contexto profissional e uma rota de experimentos. Os índices profissionais são estimativas do modelo, não medidas de competência ou probabilidade de sucesso.</p></li></ol>
+    <h2 id="method-title">Suas respostas. Seu mapa de valores.</h2>
+    <ol class="method-list"><li><strong>Conte um pouco sobre você.</strong><p>As perguntas de apresentação registram seu contexto. Elas não alteram os resultados das cores.</p></li><li><strong>Distribua seus pontos.</strong><p>Dez blocos com seis afirmações. Distribua 12 pontos inteiros em cada bloco, totalizando 120. É permitido atribuir zero.</p></li><li><strong>Explore seu perfil.</strong><p>Veja a distribuição das cores, seus cruzamentos e as diferenças entre os temas. Todas as medidas vêm das pontuações do questionário.</p></li></ol>
     <p class="privacy-note">As respostas são armazenadas apenas neste navegador. O relatório apoia desenvolvimento e não constitui laudo psicológico clínico.</p>
   </dialog>
 
-  <script src="report.js?v=verium-1"></script>
-  <script src="app.js?v=verium-1"></script>
+  <dialog id="spiral-dialog" class="spiral-dialog" aria-labelledby="spiral-title">
+    <div class="dialog-heading"><span class="eyebrow">Conheça a Espiral</span><button id="close-spiral" class="secondary-button" type="button">Fechar</button></div>
+    <h2 id="spiral-title">Diferentes formas de perceber.<br><em>Mais de uma pode viver em você.</em></h2>
+    <p>A Espiral Dinâmica parte dos estudos de Clare W. Graves e foi difundida por Don Beck e Christopher Cowan. Ela propõe uma leitura de sistemas de valores e de como diferentes prioridades se relacionam com as condições de vida.</p>
+    <p>As cores ajudam a apresentar essas perspectivas. Não são caixas fixas para classificar pessoas: diferentes sistemas podem coexistir. Uma cor não determina seu valor pessoal, sua saúde mental ou suas capacidades.</p>
+    <div id="spiral-colors" class="spiral-color-grid"></div>
+    <p class="spiral-scope"><strong>O recorte deste questionário:</strong> seis cores, de Púrpura a Amarelo. O modelo também descreve Bege (necessidades básicas) e Turquesa (integração do conjunto), que não são pontuados aqui. O resultado mostra a prioridade relativa das afirmações escolhidas, não um estágio comprovado de desenvolvimento.</p>
+    <p class="reading-note">Conhecer a teoria é opcional. Ao responder, considere sua experiência real, sem buscar uma cor ideal. As letras e cores do gabarito não aparecem nos blocos.</p>
+    <div class="source-links"><a href="https://ahead-harpymimus-002.notion.site/Perfil-Psicol-gico-1891ddaac10f801c9ffcc0ffa9335a46" target="_blank" rel="noopener noreferrer">Biblioteca de cores ↗</a><a href="https://www.toolshero.com/change-management/spiral-dynamics/" target="_blank" rel="noopener noreferrer">Toolshero ↗</a><a href="https://kenwilber.com.br/dinamica-da-espiral/" target="_blank" rel="noopener noreferrer">Dinâmica da Espiral ↗</a><a href="https://www.spiral-dynamics.com/theory/systems_not_types.htm" target="_blank" rel="noopener noreferrer">Sistemas de valores ↗</a></div>
+  </dialog>
+
+  <script src="spiral.js?v=espiral-2"></script>
+  <script src="report.js?v=espiral-2"></script>
+  <script src="app.js?v=espiral-2"></script>
 </body>
 </html>

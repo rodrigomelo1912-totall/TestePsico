@@ -7,14 +7,16 @@ const vm = require('node:vm');
 function app() {
   const nodes = new Map();
   const context = vm.createContext({
-    document: { getElementById(id) {
+    document: { querySelectorAll: () => [], getElementById(id) {
       if (!nodes.has(id)) nodes.set(id, { innerHTML: '', textContent: '' });
       return nodes.get(id);
     } }
   });
+  vm.runInContext(fs.readFileSync(path.join(__dirname, '../spiral.js'), 'utf8'), context);
   vm.runInContext(fs.readFileSync(path.join(__dirname, '../report.js'), 'utf8'), context);
   const source = fs.readFileSync(path.join(__dirname, '../app.js'), 'utf8');
   vm.runInContext(source.slice(0, source.indexOf('$("profile-form").addEventListener')), context);
+  vm.runInContext('updateMotion = () => {};', context);
   return { run: code => vm.runInContext(code, context), nodes };
 }
 
@@ -37,26 +39,49 @@ test('donut uses exact point proportions, including all points in one dimension'
   assert.match(run('renderDonut(totals(), "Teste")'), /stroke-dasharray="100 0"/);
 });
 
-test('report renders context as text, not participant-supplied markup', () => {
-  const { run, nodes } = app();
-  run('state.answers = QUESTIONS.map(() => ({B:1,C:1,D:2,E:4,F:1,G:3})); state.profile.roleArea = "<img src=x onerror=alert(1)>"; state.profile.challenge = "<script>injection</script>"; state.profile.goals = "A & B";');
-  run('renderProfessionalReport(totals(), [...totals()].sort((a,b) => b.points-a.points)); renderDevelopmentRoute([...totals()].sort((a,b) => b.points-a.points)); renderAnalysis([...totals()].sort((a,b) => b.points-a.points));');
-  for (const id of ['professional-report', 'development-route', 'analysis-cards']) {
-    assert.doesNotMatch(nodes.get(id).innerHTML, /<script>|<img src=x/);
-  }
-  assert.match(nodes.get('professional-report').innerHTML, /&lt;img/);
-  assert.match(nodes.get('development-route').innerHTML, /&lt;script&gt;/);
+test('uniform scores retain all ties without inventing a dominant color', () => {
+  const { run } = app();
+  run('var profile = buildSpiralProfile(QUESTIONS.map(() => ({B:2,C:2,D:2,E:2,F:2,G:2})))');
+  assert.equal(run('profile.highest.length'), 6);
+  assert.equal(run('profile.uniqueLeaders.length'), 0);
+  assert.match(run('describeDistribution(profile)'), /Não há uma cor predominante/);
 });
 
-test('every development stage has a linked printable panel and targeted experiment', () => {
-  const { run, nodes } = app();
-  run('state.answers = QUESTIONS.map(() => ({B:1,C:1,D:2,E:4,F:1,G:3})); renderDevelopmentRoute([...totals()].sort((a,b) => b.points-a.points));');
-  const report = nodes.get('development-route').innerHTML;
-  for (let stage = 0; stage < 5; stage++) {
-    assert.match(report, new RegExp(`aria-controls="dt-panel-${stage}"`));
-    assert.match(report, new RegExp(`id="dt-panel-${stage}"`));
+test('all fifteen pairs are symmetric and unsupported zero pairs are explicit', () => {
+  const { run } = app();
+  run('var profile = buildSpiralProfile(QUESTIONS.map(() => ({B:0,C:0,D:0,E:12,F:0,G:0})))');
+  assert.equal(run('Object.keys(COLOR_PAIRS).length'), 15);
+  assert.equal(run('Object.keys(COLOR_PAIRS).every(key => buildColorPair(profile,...key).points === buildColorPair(profile,...[...key].reverse()).points)'), true);
+  assert.equal(run('buildColorPair(profile,"E","F").supported'), false);
+  assert.equal(run('buildColorPair(profile,"E","F").together'), 0);
+  assert.throws(() => run('buildColorPair(profile,"E","E")'));
+});
+
+test('invalid, fractional and incomplete answers cannot generate a report', () => {
+  const { run } = app();
+  for (const value of [-1, 1.5, 13, NaN]) {
+    run('var answers = QUESTIONS.map(() => ({B:2,C:2,D:2,E:2,F:2,G:2}))');
+    assert.throws(() => run(`answers[0].B = ${value}; buildSpiralProfile(answers)`));
   }
-  assert.equal((report.match(/role="tabpanel"/g) || []).length, 5);
-  assert.match(report, /Faça três conversas curtas/);
-  assert.match(report, /Dias 61–90/);
+  assert.throws(() => run('buildSpiralProfile([])'));
+});
+
+test('report evidence is grounded in all sixty responses, not professional context', () => {
+  const { run, nodes } = app();
+  run('var profile = buildSpiralProfile(QUESTIONS.map(() => ({B:1,C:1,D:2,E:4,F:1,G:3}))); currentReport = profile; renderProfileInsights(profile); renderAnswerEvidence(profile);');
+  const before = nodes.get('analysis-cards').innerHTML;
+  run('state.profile.roleArea = "CEO"; state.profile.challenge = "<script>injection</script>"; renderProfileInsights(profile);');
+  assert.equal(nodes.get('analysis-cards').innerHTML, before);
+  assert.equal((nodes.get('answer-evidence').innerHTML.match(/class="answer-evidence-row"/g) || []).length, 60);
+  assert.doesNotMatch(nodes.get('answer-evidence').innerHTML, /benchmark|90 dias|FIT|<script>/);
+  run('QUESTIONS[0].options[0][1] = "<img src=x>";');
+  assert.match(run('answerRows(profile,0)'), /&lt;img/);
+});
+
+test('equal totals retain different block patterns', () => {
+  const { run } = app();
+  run('var a = QUESTIONS.map(() => ({B:2,C:2,D:2,E:2,F:2,G:2})); var b = a.map(item => ({...item})); b[0].B=4; b[0].C=0; b[1].B=0; b[1].C=4;');
+  assert.equal(run('buildSpiralProfile(b).uniform'), true);
+  assert.equal(run('buildSpiralProfile(b).uniqueLeaders.length'), 2);
+  assert.equal(run('buildSpiralProfile(a).uniqueLeaders.length'), 0);
 });
