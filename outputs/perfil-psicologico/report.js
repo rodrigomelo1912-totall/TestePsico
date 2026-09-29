@@ -59,12 +59,41 @@ function answerRows(profile, index) {
   return QUESTIONS[index].options.map(([code, text]) => `<div class="answer-evidence-row"><span class="color-dot" style="--color:${COLORS[code].hex}"></span><div><strong>${COLORS[code].name}</strong><p>${escapeHTML(text)}</p></div><b>${profile.blocks[index].answer[code]}<small>/12</small></b></div>`).join("");
 }
 
+function polarPoint(cx, cy, radius, angle) {
+  const radians = (angle - 90) * Math.PI / 180;
+  return [cx + radius * Math.cos(radians), cy + radius * Math.sin(radians)];
+}
+
+function arcPath(cx, cy, radius, start, end) {
+  const [x1, y1] = polarPoint(cx, cy, radius, start);
+  const [x2, y2] = polarPoint(cx, cy, radius, end);
+  return `M ${x1.toFixed(2)} ${y1.toFixed(2)} A ${radius} ${radius} 0 ${end - start > 180 ? 1 : 0} 1 ${x2.toFixed(2)} ${y2.toFixed(2)}`;
+}
+
+function radialDimensionMap(profile) {
+  const cx = 250, cy = 250, radius = 146, gap = 2.3, sweep = 36;
+  const groups = profile.blocks.map(block => {
+    const start = block.index * 36 + gap;
+    let cursor = start;
+    const paths = profile.colors.map(color => {
+      const amount = block.answer[color.code] / 12 * (sweep - gap * 2);
+      const path = amount ? `<path d="${arcPath(cx, cy, radius, cursor, cursor + amount)}" stroke="${color.hex}" stroke-width="25"/>` : "";
+      cursor += amount;
+      return path;
+    }).join("");
+    const mid = block.index * 36 + 18;
+    const [lx, ly] = polarPoint(cx, cy, 190, mid);
+    return `<g class="radial-dimension" data-block="${block.index}" role="button" tabindex="0" aria-label="${String(block.index + 1).padStart(2, "0")} ${escapeHTML(block.label)}" aria-pressed="${block.index === 0}"><path class="radial-hit" d="${arcPath(cx, cy, radius, start, start + sweep - gap)}"/><g class="radial-segments">${paths}</g><text x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="middle" class="radial-index">${String(block.index + 1).padStart(2, "0")}</text><text x="${lx.toFixed(1)}" y="${(ly + 14).toFixed(1)}" text-anchor="middle" class="radial-label">${escapeHTML(block.label.replace("Preferências de trabalho", "Preferências"))}</text></g>`;
+  }).join("");
+  return `<div class="radial-visual"><svg class="radial-map" viewBox="0 0 500 500" role="img" aria-label="Mapa radial das dez dimensões, com doze pontos distribuídos por dimensão."><circle cx="250" cy="250" r="146" fill="none" stroke="#dfe5f1" stroke-width="25"/>${groups}<circle cx="250" cy="250" r="91" fill="#fff"/><text x="250" y="238" text-anchor="middle" class="radial-center-kicker">VISÃO GERAL</text><text x="250" y="268" text-anchor="middle" class="radial-center-number">10</text><text x="250" y="288" text-anchor="middle" class="radial-center-copy">DIMENSÕES</text><text x="250" y="306" text-anchor="middle" class="radial-center-copy">12 pontos por dimensão</text></svg><div class="radial-legend">${profile.colors.map(color => `<span><i style="background:${color.hex}"></i>${color.name}</span>`).join("")}</div></div>`;
+}
+
 function renderAnswerEvidence(profile) {
   const legend = profile.colors.map(item => `<span><i style="background:${item.hex}"></i>${item.name}</span>`).join("");
   $("answer-evidence").innerHTML = `
     <div class="chapter-heading"><div><span class="eyebrow">04 / Respostas que sustentam a leitura</span><h2>O total mostra o conjunto.<br><em>Os blocos mostram as diferenças.</em></h2></div><p>Cada linha contém 12 pontos. Selecione um tema para ver as afirmações e conferir de onde veio a distribuição. São comparações entre respostas, não uma medida de estabilidade emocional.</p></div>
     <div class="block-legend">${legend}</div>
-    <div class="block-map">${profile.blocks.map(block => `<button class="block-map-row" type="button" data-block="${block.index}" aria-pressed="${block.index === 0}" aria-controls="block-evidence"><span class="block-map-label"><small>${String(block.index + 1).padStart(2, "0")}</small>${block.label}</span><span class="block-stack" aria-hidden="true">${profile.colors.map(color => `<i style="width:${block.answer[color.code] / 12 * 100}%;background:${color.hex}"></i>`).join("")}</span><span class="block-map-value">${block.leaders.map(code => COLORS[code].name).join(" + ")} · ${block.peak}/12</span></button>`).join("")}</div>
+    ${radialDimensionMap(profile)}
     <section id="block-evidence" class="block-evidence" aria-live="polite"></section>
     <details class="method-details answer-memory"><summary>Consultar as 60 respostas e pontuações</summary>${profile.blocks.map(block => `<section class="answer-memory-block"><h3>${block.index + 1}. ${QUESTIONS[block.index].title}</h3>${answerRows(profile, block.index)}</section>`).join("")}</details>
     <details class="method-details"><summary>Como esta leitura foi construída</summary><p><strong>Base numérica:</strong> soma dos pontos de cada cor nos dez blocos. Percentual = pontos da cor ÷ 120 × 100. Cada bloco tem peso igual; pontuações empatadas permanecem empatadas.</p><p><strong>Cruzamentos:</strong> soma do par, diferença em pontos e quantidade de blocos em que as duas cores receberam pontos. Os textos de complementaridade e tensão são hipóteses editoriais inspiradas nos significados das cores; não são escalas psicológicas validadas.</p><p><strong>Alcance:</strong> as perguntas de apresentação não alteram a pontuação nem geram conclusões sobre cargo, competência ou personalidade. A análise se limita às escolhas do questionário. Não há classificação de pessoas em estágios superiores, diagnóstico clínico ou comparação com uma população.</p><p><strong>Referências conceituais:</strong> <a href="https://ahead-harpymimus-002.notion.site/Perfil-Psicol-gico-1891ddaac10f801c9ffcc0ffa9335a46" target="_blank" rel="noopener noreferrer">Biblioteca de cores fornecida</a>; <a href="https://www.toolshero.com/change-management/spiral-dynamics/" target="_blank" rel="noopener noreferrer">Toolshero</a>; <a href="https://kenwilber.com.br/dinamica-da-espiral/" target="_blank" rel="noopener noreferrer">Dinâmica da Espiral</a>; <a href="https://www.spiral-dynamics.com/theory/systems_not_types.htm" target="_blank" rel="noopener noreferrer">Spiral Dynamics: sistemas, não tipos de pessoas</a>. Estas fontes explicam o modelo; não validam este questionário ou seus cruzamentos.</p></details>
@@ -77,6 +106,11 @@ function renderBlockEvidence(index) {
   const block = currentReport.blocks[index];
   $("block-evidence").innerHTML = `<span class="eyebrow">Bloco ${index + 1} / ${block.label}</span><h3>${QUESTIONS[index].title}</h3><p>${block.leaders.length > 1 ? "Empate entre" : "Maior pontuação em"} ${block.leaders.map(code => COLORS[code].name).join(" + ")}: ${block.peak} pontos ${block.leaders.length > 1 ? "cada" : ""}.</p>${answerRows(currentReport, index)}`;
   document.querySelectorAll("[data-block]").forEach(button => button.setAttribute("aria-pressed", String(Number(button.dataset.block) === index)));
+}
+
+function selectRadialDimension(index) {
+  renderBlockEvidence(index);
+  document.querySelectorAll(".radial-dimension").forEach(segment => segment.setAttribute("aria-pressed", String(Number(segment.dataset.block) === index)));
 }
 
 function renderSpiralIntroduction() {
@@ -154,7 +188,11 @@ function initializeReportUI() {
   });
   $("answer-evidence").addEventListener("click", event => {
     const button = event.target.closest("[data-block]");
-    if (button) renderBlockEvidence(Number(button.dataset.block));
+    if (button) selectRadialDimension(Number(button.dataset.block));
+  });
+  $("answer-evidence").addEventListener("keydown", event => {
+    const segment = event.target.closest(".radial-dimension");
+    if (segment && (event.key === "Enter" || event.key === " ")) { event.preventDefault(); selectRadialDimension(Number(segment.dataset.block)); }
   });
   window.addEventListener("scroll", () => {
     if (!readingFrame) readingFrame = requestAnimationFrame(updateReadingProgress);
