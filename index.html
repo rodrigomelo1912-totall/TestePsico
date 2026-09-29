@@ -3,39 +3,45 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Mapeamento psicológico baseado na Espiral de Valores.">
-  <title>Mapeamento Psicológico | Totall</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
+  <meta name="description" content="Verium: conheça seus valores, conecte seu perfil ao contexto profissional e construa sua rota de desenvolvimento.">
+  <meta name="theme-color" content="#0b1936">
+  <title>Perfil & Potencial | Verium</title>
+  <link rel="icon" href="assets/verium-symbol.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css?v=verium-1">
 </head>
 <body>
-  <div class="ambient ambient-one"></div>
-  <div class="ambient ambient-two"></div>
-
+  <a class="skip-link" href="#main-content">Ir para o conteúdo</a>
   <header class="site-header">
-    <a class="brand" href="#" aria-label="Totall - início">
-      <span class="brand-logo"><img src="assets/logo-totall.png" alt="Totall"></span>
-      <small>PROPRIEDADE <strong>INTELECTUAL</strong></small>
+    <a class="brand" href="#main-content" aria-label="Verium CFO / HUB">
+      <img src="assets/logo-verium.svg" alt="Verium CFO / HUB" width="184" height="50">
     </a>
-    <div class="header-meta">
-      <span class="eyebrow">Espiral de Valores</span>
-      <span id="header-person"></span>
-    </div>
+    <span class="header-title">Pessoas, contexto e desenvolvimento</span>
+    <div class="header-meta"><span id="header-person"></span><button id="method-button" class="text-button" type="button">Como funciona <span aria-hidden="true">↗</span></button></div>
   </header>
 
-  <main>
+  <div class="workspace">
+    <aside class="journey-sidebar" aria-label="Sua jornada">
+      <div class="sidebar-intro"><span class="eyebrow">Verium / Perfil & Potencial</span><p>Conhecer seu jeito.<br><span>Ampliar suas possibilidades.</span></p></div>
+      <ol class="journey-steps">
+        <li class="active" data-journey="0"><span class="journey-number">01</span><div>Seu contexto<small>Cargo e responsabilidades</small></div></li>
+        <li data-journey="1"><span class="journey-number">02</span><div>Suas decisões<small>Rotina e desafios</small></div></li>
+        <li data-journey="2"><span class="journey-number">03</span><div>Seu horizonte<small>Forças e objetivos</small></div></li>
+        <li data-journey="3"><span class="journey-number">04</span><div>Seus valores<small id="journey-quiz-label">10 blocos de reflexão</small></div></li>
+        <li data-journey="4"><span class="journey-number">↗</span><div>Sua rota<small>Perfil e desenvolvimento</small></div></li>
+      </ol>
+      <div class="sidebar-note"><svg viewBox="0 0 200 70" aria-hidden="true"><path d="M5 50 C45 50 35 15 80 15 S130 55 160 30 L195 6"/><circle r="4"><animateMotion dur="7s" repeatCount="indefinite" path="M5 50 C45 50 35 15 80 15 S130 55 160 30 L195 6"/></circle></svg><strong>Uma reflexão de cada vez.</strong><p>Considere como você age no cotidiano, não como gostaria de ser visto.</p><small>Suas respostas ficam neste navegador.</small></div>
+    </aside>
+  <main id="main-content" tabindex="-1">
     <section id="welcome-screen" class="screen active">
       <div class="hero-grid">
         <div class="hero-copy">
-          <span class="eyebrow">Mapeamento psicológico</span>
-          <h1>Entenda os valores que orientam suas decisões.</h1>
-          <p>Distribua exatamente <strong>12 pontos</strong> entre as seis afirmações de cada bloco. Ao final, você verá sua matriz de valores e uma leitura inicial do perfil.</p>
+          <span class="eyebrow">O ponto de partida / Autoconhecimento profissional</span>
+          <h1>Seu jeito de agir.<br><em>Seu próximo movimento.</em></h1>
+          <p>Conheça os valores que orientam suas escolhas e conecte essa leitura ao seu momento profissional. Primeiro, conte um pouco sobre você.</p>
           <div class="facts">
-            <div><strong>10</strong><span>blocos</span></div>
-            <div><strong>60</strong><span>afirmações</span></div>
-            <div><strong>120</strong><span>pontos totais</span></div>
+            <div><strong>01</strong><span>Contexto</span></div>
+            <div><strong>02</strong><span>Valores</span></div>
+            <div><strong>03</strong><span>Rota de evolução</span></div>
           </div>
         </div>
 
@@ -99,7 +105,7 @@
             <button id="intro-next" class="primary-button" type="button">Avançar <span>→</span></button>
             <button id="intro-submit" class="primary-button" type="submit" hidden>Começar mapeamento <span>→</span></button>
           </div>
-          <p class="privacy-note">Suas respostas ficam somente neste navegador.</p>
+          <p class="privacy-note">Não há resposta ideal. O ponto de partida é a sua experiência.</p>
         </form>
       </div>
     </section>
@@ -126,7 +132,7 @@
               <span>de 12 pontos</span>
             </div>
           </div>
-          <p class="question-help">Quanto mais uma afirmação representa você, mais pontos ela deve receber. É permitido atribuir zero.</p>
+          <p class="question-help">Distribua <strong>12 pontos</strong> entre as seis afirmações. Quanto mais representa você, mais pontos recebe. Pode atribuir zero.</p>
           <div id="options-list" class="options-list"></div>
           <p id="validation-message" class="validation-message" aria-live="polite"></p>
           <div class="question-actions">
@@ -138,15 +144,26 @@
     </section>
 
     <section id="results-screen" class="screen">
+      <nav class="report-nav" aria-label="Capítulos do relatório">
+        <div class="report-nav-inner"><div class="report-links"><a href="#panorama">01 <span>Panorama</span></a><a href="#leitura">02 <span>Seu jeito</span></a><a href="#professional-report">03 <span>Contexto</span></a><a href="#development-route">04 <span>Sua rota</span></a></div><div class="report-controls"><button id="motion-toggle" class="text-button" type="button" aria-pressed="false">Pausar movimento</button><button id="print-button" class="primary-button" type="button">Imprimir / PDF <span aria-hidden="true">↗</span></button></div></div>
+        <div class="reading-progress" aria-hidden="true"><span id="reading-progress-fill"></span></div>
+      </nav>
+      <section class="report-cover">
+        <div class="report-container cover-grid">
+          <div><span class="eyebrow">Verium / Relatório de perfil profissional</span><h1>O seu potencial.<br><em>Uma nova perspectiva.</em></h1><p id="cover-summary"></p><div class="cover-person"><strong id="cover-name"></strong><span id="cover-role"></span></div></div>
+          <div class="cover-visual"><div id="cover-donut" class="cover-donut"></div><p>Seis perspectivas. Um perfil único.</p></div>
+        </div>
+        <div class="report-container cover-bottom"><div class="cover-facts"><div><strong>10<span>/10</span></strong><small>blocos concluídos</small></div><div><strong>120</strong><small>pontos distribuídos</small></div><div><strong>6</strong><small>dimensões de valores</small></div></div><a href="#panorama">Explore sua rota de evolução <span aria-hidden="true">↓</span></a></div>
+      </section>
       <div class="results-shell">
-        <div class="results-hero">
+        <div id="panorama" class="results-hero chapter">
           <div>
-            <span class="eyebrow">Seu resultado</span>
+            <span class="eyebrow">01 / Enxergar o todo</span>
             <h1 id="result-title"></h1>
             <p id="result-summary"></p>
           </div>
           <div class="result-actions">
-            <button id="print-button" class="secondary-button" type="button">Imprimir / PDF</button>
+            <button id="review-button" class="secondary-button" type="button">Revisar respostas</button>
             <button id="restart-button" class="ghost-button" type="button">Refazer teste</button>
           </div>
         </div>
@@ -158,6 +175,7 @@
               <strong id="total-score">120 pontos</strong>
             </div>
             <div id="matrix-chart" class="matrix-chart"></div>
+            <p class="privacy-note">Percentuais arredondados. As pontuações somam 120.</p>
           </section>
 
           <section class="glass-card radar-card">
@@ -168,27 +186,39 @@
           </section>
         </div>
 
-        <section class="analysis-section">
+        <section id="leitura" class="analysis-section chapter">
           <div class="section-title">
-            <div><span class="step-label">Análise inicial</span><h2>Como este perfil tende a operar</h2></div>
+            <div><span class="step-label">02 / Reconhecer padrões</span><h2>O que te move.<br><em>Como isso aparece no trabalho.</em></h2></div>
           </div>
           <div id="analysis-cards" class="analysis-cards"></div>
         </section>
 
-        <section class="glass-card detail-section">
+        <details class="glass-card detail-section">
+          <summary>Conheça cada perspectiva da sua espiral <span aria-hidden="true">+</span></summary>
           <div class="section-title">
             <div><span class="step-label">Detalhamento</span><h2>Leitura por nível da espiral</h2></div>
           </div>
           <div id="level-details" class="level-details"></div>
-        </section>
+        </details>
 
         <section id="professional-report" class="professional-report"></section>
+        <section id="development-route" class="development-route chapter"></section>
 
         <p class="disclaimer">Esta leitura é uma ferramenta de autoconhecimento e desenvolvimento, não um diagnóstico clínico ou psicológico.</p>
+        <footer class="report-footer"><img src="assets/logo-verium.svg" alt="Verium CFO / HUB" width="150" height="41"><p>Perfil & Potencial<br><span id="report-date"></span></p></footer>
       </div>
     </section>
   </main>
+  </div>
 
-  <script src="app.js"></script>
+  <dialog id="method-dialog" aria-labelledby="method-title">
+    <div class="dialog-heading"><span class="eyebrow">Verium / O método</span><button id="close-method" class="secondary-button" type="button" aria-label="Fechar explicação">Fechar</button></div>
+    <h2 id="method-title">Conhecer. Conectar. Experimentar.</h2>
+    <ol class="method-list"><li><strong>Comece pelo contexto.</strong><p>Três etapas com três perguntas sobre seu trabalho, suas decisões e seus objetivos.</p></li><li><strong>Distribua seus valores.</strong><p>Dez blocos com seis afirmações. Distribua 12 pontos inteiros em cada bloco, totalizando 120. É permitido atribuir zero.</p></li><li><strong>Transforme reflexão em ação.</strong><p>Explore a matriz, as hipóteses sobre seu contexto profissional e uma rota de experimentos. Os índices profissionais são estimativas do modelo, não medidas de competência ou probabilidade de sucesso.</p></li></ol>
+    <p class="privacy-note">As respostas são armazenadas apenas neste navegador. O relatório apoia desenvolvimento e não constitui laudo psicológico clínico.</p>
+  </dialog>
+
+  <script src="report.js?v=verium-1"></script>
+  <script src="app.js?v=verium-1"></script>
 </body>
 </html>

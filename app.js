@@ -132,10 +132,27 @@ const state = {
 
 const $ = (id) => document.getElementById(id);
 const screens = ["welcome-screen", "quiz-screen", "results-screen"];
+const escapeHTML = (value) => String(value ?? "").replace(/[&<>"']/g, character => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[character]);
 
 function showScreen(id) {
   screens.forEach(screen => $(screen).classList.toggle("active", screen === id));
-  window.scrollTo({ top: 0, behavior: "smooth" });
+  document.body.classList.toggle("report-mode", id === "results-screen");
+  updateJourney(id);
+  if (id === "results-screen") setupReportMotion();
+  else reportObserver?.disconnect();
+  window.scrollTo({ top: 0, behavior: "instant" });
+  $("main-content").focus({ preventScroll: true });
+}
+
+function updateJourney(screen = document.querySelector(".screen.active")?.id) {
+  const step = screen === "results-screen" ? 4 : screen === "quiz-screen" ? 3 : state.introCurrent;
+  document.querySelectorAll("[data-journey]").forEach((item, index) => {
+    item.classList.toggle("active", index === step);
+    item.classList.toggle("done", index < step);
+    if (index === step) item.setAttribute("aria-current", "step");
+    else item.removeAttribute("aria-current");
+  });
+  $("journey-quiz-label").textContent = `Bloco ${state.current + 1} de 10`;
 }
 
 function persist() {
@@ -193,6 +210,7 @@ function renderIntro() {
   $("intro-previous").disabled = state.introCurrent === 0;
   $("intro-next").hidden = state.introCurrent === 2;
   $("intro-submit").hidden = state.introCurrent !== 2;
+  updateJourney();
 }
 
 function validateIntroSlide() {
@@ -232,17 +250,18 @@ function renderQuestion() {
     </div>`;
   }).join("");
   updatePoints(total);
+  updateJourney();
 }
 
 function updatePoints(total = blockTotal()) {
   $("points-used").textContent = total;
-  $("points-ring").style.background = `conic-gradient(${total === 12 ? "#4fae4c" : total > 12 ? "#e64b3c" : "#009bc2"} ${Math.min(total / 12, 1) * 360}deg, rgba(9,47,61,.07) 0)`;
+  $("points-ring").style.background = `conic-gradient(#2046c7 ${Math.min(total / 12, 1) * 360}deg, #e1e6f0 0)`;
   $("validation-message").textContent = total > 12 ? `Retire ${total - 12} ponto(s) para fechar este bloco.` : total < 12 ? `Ainda faltam ${12 - total} ponto(s) para fechar este bloco.` : "Bloco completo. Você pode avançar.";
-  $("validation-message").style.color = total === 12 ? "#408843" : "#bf4a43";
+  $("validation-message").style.color = total > 12 ? "#b3261e" : total === 12 ? "#2046c7" : "#657087";
 }
 
 function updateScore(code, value) {
-  state.answers[state.current][code] = Math.max(0, Math.min(12, Number(value) || 0));
+  state.answers[state.current][code] = Math.max(0, Math.min(12, Math.round(Number(value) || 0)));
   persist();
   renderQuestion();
 }
@@ -295,6 +314,11 @@ function renderResults() {
   $("result-title").textContent = `${firstName}, seu núcleo é ${first.name} + ${second.name}.`;
   $("result-summary").textContent = `${first.core} aparece como motor principal, apoiado por ${second.core.toLowerCase()}. Seu contexto como ${state.profile.roleArea} adiciona uma perspectiva importante a esta leitura.`;
   $("total-score").textContent = `${data.reduce((sum, item) => sum + item.points, 0)} pontos`;
+  $("cover-name").textContent = state.profile.name;
+  $("cover-role").textContent = state.profile.roleArea;
+  $("cover-summary").textContent = `Uma leitura dos seus valores, das suas escolhas e das possibilidades de evolução no trabalho. ${first.name} e ${second.name} aparecem com maior presença nas suas respostas.`;
+  $("cover-donut").innerHTML = renderDonut(data, "Distribuição dos 120 pontos nas seis perspectivas de valores");
+  $("report-date").textContent = `Emitido em ${new Date().toLocaleDateString("pt-BR")} · Espiral de Valores`;
   $("matrix-chart").innerHTML = data.map(item => `<div class="matrix-row">
     <div class="matrix-label"><span class="color-dot" style="--color:${item.hex}"></span>${item.name}</div>
     <div class="matrix-bar"><span style="--width:${item.percent}%;--color:${item.hex}"></span></div>
@@ -303,6 +327,7 @@ function renderResults() {
   renderRadar(data);
   renderAnalysis(ranked);
   renderProfessionalReport(data, ranked);
+  renderDevelopmentRoute(ranked);
   $("level-details").innerHTML = ranked.map((item, index) => `<article class="level-card">
     <div class="level-head"><div class="level-name"><span class="color-dot" style="--color:${item.hex}"></span>${item.name}</div><strong>${item.percent}%</strong></div>
     <p>${item.description} ${index < 2 ? "Como nível dominante, tende a aparecer com frequência nas escolhas e no modo de trabalhar." : index === ranked.length - 1 ? "Como nível menos presente, pode indicar um canal que exige mais intenção consciente." : "Aparece como recurso complementar, ativado conforme o contexto."}</p>
@@ -312,131 +337,32 @@ function renderResults() {
 
 function renderDonut(data, title) {
   let offset = 0;
+  const total = data.reduce((sum, item) => sum + item.points, 0) || 1;
   const slices = data.map(item => {
-    const value = item.percent;
-    const dash = `${value} ${100 - value}`;
-    const slice = `<circle r="15.915" cx="18" cy="18" fill="transparent" stroke="${item.hex}" stroke-width="7.5" stroke-dasharray="${dash}" stroke-dashoffset="${25 - offset}" />`;
+    const value = item.points / total * 100;
+    const slice = `<circle class="donut-slice" r="92" cx="120" cy="120" pathLength="100" fill="none" stroke="${item.hex}" stroke-width="20" stroke-dasharray="${value} ${100 - value}" stroke-dashoffset="${-offset}"><title>${item.name}: ${item.points} pontos (${item.percent}%)</title></circle>`;
     offset += value;
     return slice;
   }).join("");
-  return `<svg viewBox="0 0 36 36" role="img" aria-label="${title}">${slices}<circle r="9" cx="18" cy="18" fill="#080d16"/><text x="18" y="17.1" text-anchor="middle">DNA</text><text x="18" y="21.3" text-anchor="middle">PRO</text></svg>`;
+  return `<svg class="profile-donut" viewBox="0 0 240 240" role="img" aria-label="${title}"><circle r="106" cx="120" cy="120" fill="none" stroke="#34476e" stroke-width=".5"/><g transform="rotate(-90 120 120)">${slices}</g><text class="donut-center-sub" x="120" y="100" text-anchor="middle">SEU MAPA</text><text class="donut-center-title" x="120" y="129" text-anchor="middle">de valores</text><text class="donut-center-sub" x="120" y="151" text-anchor="middle">120 PONTOS</text></svg>`;
 }
 
-function colorLegend(data) {
-  return data.map(item => `<li><span style="--color:${item.hex}"></span><strong>${item.name}</strong><em>${item.percent}%</em><small>${item.core}</small></li>`).join("");
-}
-
-function renderProfessionalReport(data, ranked) {
-  const method = professionalMethod(data);
-  const top = ranked[0], second = ranked[1], third = ranked[2], low = ranked[ranked.length - 1];
-  const name = state.profile.name || "Profissional";
-  const role = state.profile.roleArea || method.archetype.title;
-  const flow = [
-    { label: "Enxerga", text: `${top.name} aponta onde você começa: ${LEVEL_WORK_STYLE[top.code].gift.toLowerCase()}` },
-    { label: "Conecta", text: `${second.name} mostra como você conecta prioridades, pessoas e recursos.` },
-    { label: "Decide", text: `${third.name} vira recurso de decisão quando há pressão e ambiguidade.` },
-    { label: "Posiciona", text: `Use o contexto informado para colocar energia no lugar de maior impacto.` },
-    { label: "Escala", text: `Resultado sustentável vem quando ${top.name} não sufoca ${low.name}.` }
-  ];
-  const dimensionRows = Object.values(method.dimensions).map(item => {
-    const status = item.score >= item.benchmark + .5 ? "Acima da média" : item.score >= item.benchmark - .4 ? "Aderente" : "Oportunidade";
-    return `<tr><td>${item.label}</td><td><strong class="${status === "Oportunidade" ? "warn" : "good"}">${item.score}/10</strong></td><td>${item.benchmark.toFixed(1)}</td><td>${status}. ${item.analysis}</td></tr>`;
-  }).join("");
-  const insights = [
-    { title: `Combo dominante: ${top.name} + ${second.name}`, text: `Essa dupla explica o modo como você naturalmente transforma intenção em comportamento profissional.` },
-    { title: `Ponto cego provável: ${low.name}`, text: `${LEVEL_WORK_STYLE[low.code].lowRisk} A chave é tratar esse nível como prática estruturada, não como traço espontâneo.` },
-    { title: `Match com a cadeira: ${method.archetype.title}`, text: `${method.archetype.sentence} O fit melhora quando suas responsabilidades reais exigem as dimensões mais bem pontuadas.` },
-    { title: "Design thinking aplicado", text: "Observe uma situação, formule hipótese de comportamento, teste uma intervenção curta, colete feedback e ajuste o sistema." }
-  ];
-
-  $("professional-report").innerHTML = `
-    <div class="pro-hero">
-      <div>
-        <span class="pro-kicker">Fit psicológico com a cadeira</span>
-        <h2>${name}</h2>
-        <p class="pro-role">${role}</p>
-        <p>${method.archetype.sentence}</p>
-      </div>
-      <div class="fit-orb">
-        <span>Fit com a cadeira</span>
-        <strong>${method.fit}%</strong>
-        <em>${method.fitLabel}</em>
-      </div>
-    </div>
-
-    <div class="pro-summary">
-      <p>Seu perfil combina <strong>${top.name}</strong>, <strong>${second.name}</strong> e <strong>${third.name}</strong>. Em termos profissionais, isso indica que sua performance tende a crescer quando a cadeira permite usar ${top.core.toLowerCase()}, apoiado por ${second.core.toLowerCase()}.</p>
-    </div>
-
-    <div class="pro-grid">
-      <section class="pro-card pro-profile-card">
-        <h3>Seu perfil na espiral</h3>
-        <div class="pro-profile-layout">
-          <div class="pro-donut">${renderDonut(data, "Seu perfil profissional na espiral")}</div>
-          <ul class="pro-legend">${colorLegend(data)}</ul>
-        </div>
-      </section>
-      <section class="pro-card">
-        <h3>Leitura principal</h3>
-        <p>Você atua como <strong>${method.archetype.label}</strong>. O valor dominante define o impulso inicial; o segundo valor mostra como você organiza esse impulso; o menor valor revela onde a cadeira pode exigir desenvolvimento consciente.</p>
-      </section>
-      <section class="pro-card pro-strength">
-        <h3>Seus pontos fortes</h3>
-        <ul>${[top, second, third].map(item => `<li><strong>${item.name}</strong><span>${LEVEL_WORK_STYLE[item.code].gift}</span></li>`).join("")}</ul>
-      </section>
-      <section class="pro-card pro-attention">
-        <h3>Seu ponto de atenção</h3>
-        <p><strong>${low.name} em menor presença</strong> pode aparecer como lacuna em situações que exigem ${low.core.toLowerCase()}.</p>
-        <p><strong>O risco:</strong> ${LEVEL_WORK_STYLE[low.code].lowRisk}</p>
-        <p><strong>A chave:</strong> ${LEVEL_WORK_STYLE[low.code].lever}</p>
-      </section>
-    </div>
-
-    <section class="pro-flow">
-      <h3>Como seu perfil gera resultado</h3>
-      <div>${flow.map((item, index) => `<article><b>${index + 1}</b><strong>${item.label}</strong><p>${item.text}</p></article>`).join("")}</div>
-      <p class="superpower">Seu superpoder: transformar padrão de valores em comportamento profissional observável.</p>
-    </section>
-
-    <div class="pro-lower-grid">
-      <section class="pro-card">
-        <h3>Avaliação por dimensão</h3>
-        <table class="dimension-table"><thead><tr><th>Dimensão</th><th>Sua nota</th><th>Benchmark</th><th>Análise</th></tr></thead><tbody>${dimensionRows}</tbody></table>
-      </section>
-      <section class="pro-card pro-insights">
-        <h3>Insights que poucos veem</h3>
-        ${insights.map(item => `<article><strong>${item.title}</strong><p>${item.text}</p></article>`).join("")}
-      </section>
-    </div>
-
-    <section class="pro-synthesis">
-      <div>
-        <h3>Síntese executiva</h3>
-        <p>Você não é apenas a soma das cores. Você é o modo como essas forças aparecem diante da cadeira, da pressão, das pessoas e do resultado. A evolução profissional não está em mudar seu perfil, mas em aprender quando intensificar, dosar ou complementar cada valor.</p>
-      </div>
-      <div>
-        <span>Fit</span>
-        <strong>${method.fit}%</strong>
-        <em>${method.archetype.label}</em>
-      </div>
-    </section>
-  `;
-}
 
 function renderRadar(data) {
   const cx = 170, cy = 160, radius = 108;
+  const scaleMax = Math.max(35, ...data.map(item => item.percent));
   const point = (index, r) => {
     const angle = (-90 + index * 60) * Math.PI / 180;
     return `${cx + Math.cos(angle) * r},${cy + Math.sin(angle) * r}`;
   };
   const rings = [0.25, .5, .75, 1].map(scale => `<polygon points="${data.map((_, i) => point(i, radius * scale)).join(" ")}" fill="none" stroke="rgba(9,47,61,.11)" />`).join("");
   const axes = data.map((_, i) => `<line x1="${cx}" y1="${cy}" x2="${point(i, radius).split(",")[0]}" y2="${point(i, radius).split(",")[1]}" stroke="rgba(9,47,61,.09)" />`).join("");
-  const shape = data.map((item, i) => point(i, radius * Math.min(item.percent / 35, 1))).join(" ");
+  const shape = data.map((item, i) => point(i, radius * item.percent / scaleMax)).join(" ");
   const labels = data.map((item, i) => {
     const [x, y] = point(i, radius + 25).split(",");
     return `<text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="middle">${item.name}</text>`;
   }).join("");
-  $("radar-chart").innerHTML = `<svg viewBox="0 0 340 320" role="img" aria-label="Gráfico radar da distribuição de valores">${rings}${axes}<polygon points="${shape}" fill="rgba(0,155,194,.18)" stroke="#08728e" stroke-width="2.5"/>${labels}</svg>`;
+  $("radar-chart").innerHTML = `<svg viewBox="0 0 340 320" role="img" aria-label="Gráfico radar da distribuição de valores. Escala de 0 a ${scaleMax}%">${rings}${axes}<polygon class="radar-shape" points="${shape}" fill="#2046c71c" stroke="#2046c7" stroke-width="2"/>${labels}</svg><p class="radar-caption">Distribuição relativa · Escala de 0 a ${scaleMax}%</p>`;
 }
 
 function renderAnalysis(ranked) {
@@ -451,7 +377,7 @@ function renderAnalysis(ranked) {
     { tag: "No trabalho", title: `Potência em ${state.profile.roleArea}`, color: first.hex, text: `Sua maior potência tende a surgir em ambientes que valorizam ${first.core.toLowerCase()} e permitem usar ${second.core.toLowerCase()} como complemento.` },
     { tag: "Atenção prática", title: "Equilibrar intenção e impacto", color: lowest.hex, text: `Sob pressão, os níveis dominantes podem ser usados em excesso. Antes de uma decisão importante, pergunte como alguém com ${lowest.name} alto enxergaria a mesma situação.` }
   ];
-  $("analysis-cards").innerHTML = cards.map(card => `<article class="analysis-card" style="--card-color:${card.color}"><span>${card.tag}</span><h3>${card.title}</h3><p>${card.text}</p></article>`).join("");
+  $("analysis-cards").innerHTML = cards.map(card => `<article class="analysis-card" style="--card-color:${card.color}"><span>${card.tag}</span><h3>${escapeHTML(card.title)}</h3><p>${escapeHTML(card.text)}</p></article>`).join("");
 }
 
 $("profile-form").addEventListener("submit", (event) => {
@@ -492,7 +418,7 @@ $("options-list").addEventListener("click", (event) => {
 $("options-list").addEventListener("input", (event) => {
   if (!event.target.matches("input[data-code]")) return;
   const code = event.target.dataset.code;
-  const value = Math.max(0, Math.min(12, Number(event.target.value) || 0));
+  const value = Math.max(0, Math.min(12, Math.round(Number(event.target.value) || 0)));
   state.answers[state.current][code] = value;
   event.target.closest(".option-row").classList.toggle("has-value", value > 0);
   updatePoints();
@@ -525,14 +451,18 @@ $("next-button").addEventListener("click", () => {
 });
 
 $("save-exit").addEventListener("click", () => { persist(); showScreen("welcome-screen"); });
+$("review-button").addEventListener("click", () => { state.current = 0; renderQuestion(); showScreen("quiz-screen"); });
 $("print-button").addEventListener("click", () => window.print());
 $("restart-button").addEventListener("click", () => {
   if (!confirm("Deseja apagar as respostas e refazer o teste?")) return;
   localStorage.removeItem("totall-profile-map");
   state.current = 0;
+  state.introCurrent = 0;
   state.answers = QUESTIONS.map(() => Object.fromEntries(Object.keys(COLORS).map(key => [key, 0])));
+  renderIntro();
   showScreen("welcome-screen");
 });
 
+initializeReportUI();
 restore();
 renderIntro();
