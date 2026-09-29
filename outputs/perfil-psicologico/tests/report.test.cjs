@@ -85,3 +85,21 @@ test('equal totals retain different block patterns', () => {
   assert.equal(run('buildSpiralProfile(b).uniqueLeaders.length'), 2);
   assert.equal(run('buildSpiralProfile(a).uniqueLeaders.length'), 0);
 });
+
+test('expanded readings quote scored answers and preserve uniform profiles', () => {
+  const { run, nodes } = app();
+  run('var profile = buildSpiralProfile(QUESTIONS.map(() => ({B:2,C:2,D:2,E:2,F:2,G:2}))); renderPanoramaReading(profile);');
+  assert.equal(run('panoramaReading(profile).sections.length'), 6);
+  assert.match(nodes.get('panorama-reading').innerHTML, /2\/12 pontos/);
+  assert.match(nodes.get('panorama-reading').innerHTML, /não comprova equilíbrio emocional/);
+  run('QUESTIONS[0].options[0][1] = "<img src=x>"; renderPanoramaReading(profile);');
+  assert.match(nodes.get('panorama-reading').innerHTML, /&lt;img src=x&gt;/);
+});
+
+test('pair narratives distinguish separate contexts from shared scores', () => {
+  const { run } = app();
+  run('var profile = buildSpiralProfile(QUESTIONS.map((_,i) => ({B:i<5?12:0,C:i<5?0:12,D:0,E:0,F:0,G:0})));');
+  assert.match(run('pairReading(profile,"B","C").paragraphs.join(" ")'), /temas diferentes/);
+  assert.match(run('pairReading(profile,"D","E").paragraphs.join(" ")'), /não sustentam interpretar/);
+  assert.equal(run('pairReading(profile,"B","C").sections.length'), 2);
+});

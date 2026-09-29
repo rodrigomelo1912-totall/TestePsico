@@ -219,6 +219,7 @@ function renderResults() {
   const data = profile.colors;
   $("result-title").textContent = profile.uniform ? "Seis cores. A mesma pontuação." : profile.highest.length > 1 ? "Mais de uma perspectiva em destaque." : `${profile.highest[0].name} tem maior presença nas suas respostas.`;
   $("result-summary").textContent = describeDistribution(profile);
+  renderPanoramaReading(profile);
   $("total-score").textContent = `${profile.total} pontos`;
   $("cover-name").textContent = state.profile.name;
   $("cover-role").textContent = "Leitura individual da Espiral de Valores";

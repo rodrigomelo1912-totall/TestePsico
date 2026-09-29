@@ -4,6 +4,15 @@ let motionPaused = false;
 let readingFrame = 0;
 let currentReport;
 
+function narrativeSections(sections) {
+  return sections.map(section => `<article class="narrative-section"><h3>${escapeHTML(section.title)}</h3>${section.paragraphs.map(text => `<p>${escapeHTML(text)}</p>`).join("")}</article>`).join("");
+}
+
+function renderPanoramaReading(profile) {
+  const reading = panoramaReading(profile);
+  $("panorama-reading").innerHTML = `<span class="eyebrow">Leitura integrada das respostas</span><h2>Do gráfico ao significado.</h2><p>${escapeHTML(reading.introduction)}</p>${narrativeSections(reading.sections)}<p class="reading-note">${escapeHTML(reading.conclusion)}</p>`;
+}
+
 function renderProfileInsights(profile) {
   const top = profile.highest;
   const self = profile.blocks[0], decisions = profile.blocks[9];
@@ -31,6 +40,7 @@ function renderColorCrossings(profile) {
 
 function renderPairReading(a, b) {
   const pair = buildColorPair(currentReport, a, b);
+  const reading = pairReading(currentReport, a, b);
   const { first, second } = pair;
   const firstWidth = first.points / 120 * 100, secondWidth = second.points / 120 * 100;
   $("pair-reading").innerHTML = `
@@ -40,6 +50,7 @@ function renderPairReading(a, b) {
     </div>
     <div class="pair-facts"><article><strong>${pair.points}<small>/120</small></strong><span>Pontos destinados às duas cores</span></article><article><strong>${pair.together}<small>/10</small></strong><span>Blocos em que ambas receberam pontos</span></article><article><strong>${Math.abs(first.points - second.points)}<small> pontos</small></strong><span>Diferença entre as duas cores</span></article></div>
     <p class="reading-note">${pair.balance} A presença conjunta não é uma correlação estatística nem comprova um comportamento.</p>
+    <section class="narrative-reading"><span class="eyebrow">Análise do par selecionado</span><h2>${escapeHTML(reading.title)}</h2>${reading.paragraphs.map(text => `<p>${escapeHTML(text)}</p>`).join("")}<div class="pair-narratives">${narrativeSections(reading.sections)}</div></section>
   `;
   updateMotion();
 }

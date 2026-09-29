@@ -64,6 +64,55 @@ function buildSpiralProfile(answers) {
 
 function answerAt(block, code) { return block.answer[code]; }
 
+function colorEvidence(profile, code) {
+  const color = profile.colors.find(item => item.code === code);
+  const strongest = profile.blocks.filter(block => block.answer[code] > 0)
+    .sort((a, b) => b.answer[code] - a.answer[code] || a.index - b.index);
+  return { color, strongest, examples: strongest.slice(0, 2).map(block => ({
+    label: block.label, points: block.answer[code],
+    statement: QUESTIONS[block.index].options.find(option => option[0] === code)[1]
+  })) };
+}
+
+function colorReading(profile, code) {
+  const { color, strongest, examples } = colorEvidence(profile, code);
+  if (!color.points) return { title: `${color.name}: sem pontos nesta aplicação`, paragraphs: [
+    `As afirmações associadas a ${color.focus.toLowerCase()} não receberam pontos. Como o total por bloco é limitado, isso indica apenas menor prioridade relativa nesta aplicação; não demonstra falta de capacidade, sensibilidade ou recurso pessoal.`
+  ] };
+  const evidence = examples.map(item => `Em “${item.label}”, você destinou ${item.points}/12 pontos a “${item.statement}”`).join(". ");
+  return { title: `${color.name}: ${color.focus.toLowerCase()}`, paragraphs: [
+    `${color.name} recebeu ${color.points} pontos (${formatPercent(color.percent)}% do total) e apareceu em ${color.present} dos dez blocos. ${color.meaning} Pela lente desta cor, essas escolhas sugerem que esse tipo de referência participa das suas prioridades, sem definir toda a sua personalidade.`,
+    `${evidence}. ${strongest.filter(block => block.answer[code] === color.max).length > 2 ? "Há outros blocos empatados nessa pontuação máxima; os exemplos acima são apenas um recorte." : "Esses são exemplos das maiores pontuações desta cor, não uma descrição de todas as suas escolhas."}`,
+    `${color.min === color.max ? `A pontuação foi a mesma nos dez temas (${color.max}/12 em cada). Essa regularidade pertence às respostas, não comprova um traço fixo.` : `A pontuação varia de ${color.min} a ${color.max} entre os blocos. Isso mostra que a prioridade dada às afirmações desta cor muda conforme o tema apresentado.`} Uma possibilidade de reflexão é observar quando esse recurso ajuda suas escolhas e quando outra perspectiva precisa entrar na conversa. ${color.question}`
+  ] };
+}
+
+function panoramaReading(profile) {
+  const selected = profile.uniform ? profile.colors : profile.ranked.filter(item => item.points >= profile.ranked[1].points && item.points > 0);
+  return {
+    introduction: `${describeDistribution(profile)} A leitura abaixo considera tanto o total quanto o conteúdo das afirmações. Cores com totais próximos podem aparecer em temas diferentes; por isso, a interpretação não se resume à ordem do gráfico.`,
+    sections: selected.map(item => colorReading(profile, item.code)),
+    conclusion: profile.uniform
+      ? "O empate geral não comprova equilíbrio emocional nem integração de todos os valores. Para compreender o seu resultado, observe em quais temas você concentrou pontos e quais afirmações receberam a mesma prioridade."
+      : `Na outra ponta da distribuição, ${colorNames(profile.lowest)} recebeu ${profile.lowest[0].points} pontos por cor. Esse contraste ajuda a reconhecer o que ficou em segundo plano nas escolhas deste questionário, mas não autoriza concluir que essas qualidades estão ausentes. Leia o conjunto como prioridades declaradas, que podem ser confrontadas com exemplos reais da sua experiência.`
+  };
+}
+
+function pairReading(profile, a, b) {
+  const pair = buildColorPair(profile, a, b);
+  const shared = profile.blocks.filter(block => block.answer[a] > 0 && block.answer[b] > 0)
+    .sort((x, y) => (y.answer[a] + y.answer[b]) - (x.answer[a] + x.answer[b]) || x.index - y.index);
+  const context = shared.length
+    ? `As duas cores receberam pontos juntas em ${shared.length} dos dez temas. ${shared.slice(0, 2).map(block => `Em “${block.label}”, ${pair.first.name} recebeu ${block.answer[a]}/12 e ${pair.second.name}, ${block.answer[b]}/12`).join("; ")}. Essa presença conjunta mostra espaço dado às duas perspectivas dentro de uma mesma pergunta, mas não prova que sejam usadas simultaneamente no cotidiano.`
+    : "Não há bloco em que as duas cores tenham recebido pontos juntas. Quando ambas aparecem no total, suas pontuações vêm de temas diferentes. Portanto, o resultado não sustenta descrever este par como uma combinação presente nas mesmas situações.";
+  return { title: "O que este encontro pode dizer sobre suas escolhas", paragraphs: [
+    `${pair.first.name} representa, neste modelo, ${pair.first.focus.toLowerCase()}; ${pair.second.name}, ${pair.second.focus.toLowerCase()}. Juntas, somam ${pair.points}/120 pontos (${formatPercent(pair.percent)}%). ${pair.balance}`,
+    context,
+    pair.supported ? `${pair.hypothesis} ${shared.length ? "A partir das respostas, vale investigar como você concilia essas referências: uma pode ampliar a outra, ou ambas podem disputar prioridade em uma decisão." : "Essa possibilidade pertence ao modelo das cores; nas suas respostas, ela deve ser investigada como uma aproximação entre temas distintos, não como um padrão já demonstrado."} ${pair.question}` : pair.hypothesis,
+    "Para conferir essa hipótese, retome uma situação concreta: qual critério orientou sua escolha, qual ficou em segundo plano e o que aconteceu? A interpretação ganha sentido quando você reconhece seus limites e exemplos, não apenas quando se identifica com o nome da cor."
+  ], sections: [colorReading(profile, a), colorReading(profile, b)] };
+}
+
 function describeDistribution(profile) {
   if (profile.uniform) return "As seis cores somam 20 pontos cada. Não há uma cor predominante no total. Os blocos mostram se essa distribuição se repete ou se resulta de preferências diferentes em cada tema.";
   if (profile.highest.length > 1) return `${colorNames(profile.highest)} estão empatados na maior pontuação, com ${profile.highest[0].points} pontos cada. A leitura considera essa coexistência, sem escolher artificialmente uma cor principal.`;
