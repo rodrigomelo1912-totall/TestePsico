@@ -288,6 +288,11 @@ body.report-mode .journey-sidebar { display:none; }
 .report-footer p { font-size:11px; margin:0; text-align:right; }
 dialog { border:1px solid var(--line); border-radius:24px; padding:32px; width:min(650px,92vw); max-height:85vh; color:var(--ink); box-shadow:0 24px 100px #0003; }
 dialog::backdrop { background:#0b193699; backdrop-filter:blur(3px); }
+.export-dialog { width:min(560px,92vw); }
+.export-options { display:grid; gap:12px; margin-top:24px; }
+.export-options button { display:grid; grid-template-columns:110px 1fr; align-items:center; text-align:left; gap:14px; width:100%; }
+.export-options button strong { font-size:16px; }
+.export-options button span { font-size:13px; font-weight:400; }
 .spiral-intro-button { display:flex; align-items:center; gap:16px; width:100%; padding:20px; margin:24px 0; border:1px solid #ccd6f1; border-radius:16px; background:#edf2ff; color:var(--ink); text-align:left; cursor:pointer; }
 .spiral-intro-button strong,.spiral-intro-button small { display:block; } .spiral-intro-button small { margin-top:5px; color:var(--muted); }
 .spiral-dialog { width:min(920px,92vw); } .spiral-color-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; margin:25px 0; }

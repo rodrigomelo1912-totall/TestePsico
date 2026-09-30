@@ -187,8 +187,6 @@ function setupReportMotion() {
 
 function updateMotion() {
   document.body.classList.toggle("motion-paused", motionPaused);
-  $("motion-toggle").textContent = motionPaused ? "Ativar movimento" : "Pausar movimento";
-  $("motion-toggle").setAttribute("aria-pressed", String(motionPaused));
   // CSS animations and SVG motion both respect the same user preference.
   document.querySelectorAll("svg").forEach(svg => {
     if (motionPaused) svg.pauseAnimations?.();
@@ -201,7 +199,6 @@ function initializeReportUI() {
   motionPaused = reducedMotion.matches;
   updateMotion();
   reducedMotion.addEventListener("change", event => { motionPaused = event.matches; updateMotion(); });
-  $("motion-toggle").addEventListener("click", () => { motionPaused = !motionPaused; updateMotion(); });
   $("method-button").addEventListener("click", () => $("method-dialog").showModal());
   $("close-method").addEventListener("click", () => $("method-dialog").close());
   renderSpiralIntroduction();

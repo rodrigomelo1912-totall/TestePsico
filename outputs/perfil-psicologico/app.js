@@ -347,7 +347,23 @@ $("next-button").addEventListener("click", () => {
 
 $("save-exit").addEventListener("click", () => { persist(); showScreen("welcome-screen"); });
 $("review-button").addEventListener("click", () => { state.current = 0; renderQuestion(); showScreen("quiz-screen"); });
-$("print-button").addEventListener("click", () => window.print());
+$("export-button").addEventListener("click", () => $("export-dialog").showModal());
+$("close-export").addEventListener("click", () => $("export-dialog").close());
+$("export-pdf").addEventListener("click", () => { $("export-dialog").close(); window.print(); });
+$("export-html").addEventListener("click", () => {
+  const blob = new Blob([`<!doctype html>\n${document.documentElement.outerHTML}`], { type: "text/html;charset=utf-8" });
+  const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = "perfil-psicologico.html"; link.click();
+  URL.revokeObjectURL(link.href); $("export-dialog").close();
+});
+$("export-image").addEventListener("click", async () => {
+  const report = $("results-screen");
+  const width = Math.min(1400, Math.max(900, report.scrollWidth));
+  const clone = report.cloneNode(true); clone.querySelectorAll("dialog, .report-nav, .result-actions").forEach(node => node.remove());
+  const css = await fetch("styles.css?v=deep-dive-1").then(response => response.text());
+  const height = Math.max(1200, report.scrollHeight);
+  const markup = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}"><foreignObject width="100%" height="100%"><div xmlns="http://www.w3.org/1999/xhtml"><style>${css}</style>${clone.outerHTML}</div></foreignObject></svg>`;
+  const image = new Image(); image.onload = () => { const canvas = document.createElement("canvas"); canvas.width = width * 2; canvas.height = height * 2; canvas.getContext("2d").drawImage(image, 0, 0, canvas.width, canvas.height); const link = document.createElement("a"); link.download = "perfil-psicologico.png"; link.href = canvas.toDataURL("image/png"); link.click(); $("export-dialog").close(); }; image.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(markup)}`;
+});
 $("restart-button").addEventListener("click", () => {
   if (!confirm("Deseja apagar as respostas e refazer o teste?")) return;
   localStorage.removeItem("totall-profile-map");

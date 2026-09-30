@@ -146,7 +146,7 @@
 
     <section id="results-screen" class="screen">
       <nav class="report-nav" aria-label="Capítulos do relatório">
-        <div class="report-nav-inner"><div class="report-links"><a href="#panorama">01 <span>Panorama</span></a><a href="#leitura">02 <span>Padrões</span></a><a href="#color-crossings">03 <span>Cruzamentos</span></a><a href="#deep-dive">04 <span>Deep Dive de Alinhamento</span></a><a href="#answer-evidence">05 <span>Respostas</span></a></div><div class="report-controls"><button id="motion-toggle" class="text-button" type="button" aria-pressed="false">Pausar movimento</button><button id="print-button" class="primary-button" type="button">Imprimir / PDF <span aria-hidden="true">↗</span></button></div></div>
+        <div class="report-nav-inner"><div class="report-links"><a href="#panorama">01 <span>Panorama</span></a><a href="#leitura">02 <span>Padrões</span></a><a href="#color-crossings">03 <span>Cruzamentos</span></a><a href="#deep-dive">04 <span>Deep Dive de Alinhamento</span></a><a href="#answer-evidence">05 <span>Respostas</span></a></div><div class="report-controls"><button id="export-button" class="primary-button" type="button">Exportar <span aria-hidden="true">↗</span></button></div></div>
         <div class="reading-progress" aria-hidden="true"><span id="reading-progress-fill"></span></div>
       </nav>
       <section class="report-cover">
@@ -219,6 +219,13 @@
     <h2 id="method-title">Suas respostas. Seu mapa de valores.</h2>
     <ol class="method-list"><li><strong>Conte um pouco sobre você.</strong><p>As perguntas de apresentação registram seu contexto. Elas não alteram os resultados das cores.</p></li><li><strong>Distribua seus pontos.</strong><p>Dez blocos com seis afirmações. Distribua 12 pontos inteiros em cada bloco, totalizando 120. É permitido atribuir zero.</p></li><li><strong>Explore seu perfil.</strong><p>Veja a distribuição das cores, seus cruzamentos e as diferenças entre os temas. Todas as medidas vêm das pontuações do questionário.</p></li></ol>
     <p class="privacy-note">As respostas são armazenadas apenas neste navegador. O relatório apoia desenvolvimento e não constitui laudo psicológico clínico.</p>
+  </dialog>
+
+  <dialog id="export-dialog" class="export-dialog" aria-labelledby="export-title">
+    <div class="dialog-heading"><span class="eyebrow">Verium / Exportar relatório</span><button id="close-export" class="secondary-button" type="button">Fechar</button></div>
+    <h2 id="export-title">Escolha o formato.</h2>
+    <p>Exporte a leitura completa mantendo os capítulos e as análises abertas.</p>
+    <div class="export-options"><button id="export-pdf" class="primary-button" type="button"><strong>PDF</strong><span>Imprimir ou salvar como PDF</span></button><button id="export-image" class="secondary-button" type="button"><strong>Imagem</strong><span>Baixar uma imagem do relatório</span></button><button id="export-html" class="secondary-button" type="button"><strong>HTML</strong><span>Baixar uma página independente</span></button></div>
   </dialog>
 
   <dialog id="spiral-dialog" class="spiral-dialog" aria-labelledby="spiral-title">
