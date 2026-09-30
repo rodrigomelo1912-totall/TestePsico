@@ -85,7 +85,14 @@ function radialDimensionMap(profile) {
     const [lx, ly] = polarPoint(cx, cy, 190, mid);
     return `<g class="radial-dimension" data-block="${block.index}" role="button" tabindex="0" aria-label="${String(block.index + 1).padStart(2, "0")} ${escapeHTML(block.label)}" aria-pressed="false"><path class="radial-hit" d="${arcPath(cx, cy, radius, start, start + sweep - gap)}"/><g class="radial-segments">${paths}</g><text x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="middle" class="radial-index">${String(block.index + 1).padStart(2, "0")}</text><text x="${lx.toFixed(1)}" y="${(ly + 14).toFixed(1)}" text-anchor="middle" class="radial-label">${escapeHTML(block.label.replace("Preferências de trabalho", "Preferências"))}</text></g>`;
   }).join("");
-  return `<div class="radial-visual"><svg class="radial-map" viewBox="0 0 500 500" role="img" aria-label="Mapa radial das dez dimensões, com doze respostas distribuídas por dimensão."><circle cx="250" cy="250" r="146" fill="none" stroke="#dfe5f1" stroke-width="25"/>${groups}<circle cx="250" cy="250" r="91" fill="#fff"/><text x="250" y="238" text-anchor="middle" class="radial-center-kicker">VISÃO GERAL</text><text x="250" y="268" text-anchor="middle" class="radial-center-number">10</text><text x="250" y="288" text-anchor="middle" class="radial-center-copy">DIMENSÕES</text><text x="250" y="306" text-anchor="middle" class="radial-center-copy">12 participantes por dimensão</text></svg><div class="radial-legend">${profile.colors.map(color => `<span><i style="background:${color.hex}"></i>${color.name}</span>`).join("")}</div></div>`;
+  return `<div class="radial-visual"><svg class="radial-map" viewBox="0 0 500 500" role="img" aria-label="Mapa radial das dez dimensões, com doze respostas distribuídas por dimensão."><circle cx="250" cy="250" r="146" fill="none" stroke="#dfe5f1" stroke-width="25"/>${groups}<circle cx="250" cy="250" r="91" fill="#fff"/><text x="250" y="238" text-anchor="middle" class="radial-center-kicker">VISÃO GERAL</text><text x="250" y="268" text-anchor="middle" class="radial-center-number">10</text><text x="250" y="288" text-anchor="middle" class="radial-center-copy">DIMENSÕES</text><text x="250" y="306" text-anchor="middle" class="radial-center-copy">12 participantes por dimensão</text></svg><div id="radial-insight" class="radial-insight" aria-live="polite"><span class="eyebrow">Passe o cursor ou selecione uma dimensão</span><p>O círculo mostra o conjunto. Ao explorar um segmento, a distribuição das 12 respostas aparece aqui.</p></div><div class="radial-legend">${profile.colors.map(color => `<span><i style="background:${color.hex}"></i>${color.name}</span>`).join("")}</div></div>`;
+}
+
+function renderRadialInsight(index) {
+  const block = currentReport.blocks[index];
+  const leaders = block.leaders.map(code => COLORS[code].name).join(" + ");
+  const segments = currentReport.colors.filter(color => block.answer[color.code] > 0).map(color => `<span style="width:${block.answer[color.code] / 12 * 100}%;background:${color.hex}" title="${color.name}: ${block.answer[color.code]}/12"></span>`).join("");
+  $("radial-insight").innerHTML = `<div><span class="eyebrow">Dimensão ${String(index + 1).padStart(2, "0")}</span><h3>${escapeHTML(block.label)}</h3><p>${block.leaders.length > 1 ? "Empate entre" : "Maior presença em"} <strong>${escapeHTML(leaders)}</strong> · ${block.peak}/12</p></div><div class="radial-insight-bar" aria-label="Distribuição de 12 respostas">${segments}</div><small>A faixa mostra as 12 respostas distribuídas entre as seis cores.</small>`;
 }
 
 function renderAnswerEvidence(profile) {
@@ -110,6 +117,7 @@ function renderBlockEvidence(index) {
 
 function selectRadialDimension(index) {
   renderBlockEvidence(index);
+  renderRadialInsight(index);
   document.querySelectorAll(".radial-dimension").forEach(segment => segment.setAttribute("aria-pressed", String(Number(segment.dataset.block) === index)));
 }
 
@@ -193,6 +201,10 @@ function initializeReportUI() {
   $("answer-evidence").addEventListener("keydown", event => {
     const segment = event.target.closest(".radial-dimension");
     if (segment && (event.key === "Enter" || event.key === " ")) { event.preventDefault(); selectRadialDimension(Number(segment.dataset.block)); }
+  });
+  $("answer-evidence").addEventListener("pointerover", event => {
+    const segment = event.target.closest(".radial-dimension");
+    if (segment) renderRadialInsight(Number(segment.dataset.block));
   });
   window.addEventListener("scroll", () => {
     if (!readingFrame) readingFrame = requestAnimationFrame(updateReadingProgress);
