@@ -14,6 +14,7 @@ function app() {
   });
   vm.runInContext(fs.readFileSync(path.join(__dirname, '../spiral.js'), 'utf8'), context);
   vm.runInContext(fs.readFileSync(path.join(__dirname, '../dimension-mix.js'), 'utf8'), context);
+  vm.runInContext(fs.readFileSync(path.join(__dirname, '../deep-themes.js'), 'utf8'), context);
   vm.runInContext(fs.readFileSync(path.join(__dirname, '../deep-dive.js'), 'utf8'), context);
   vm.runInContext(fs.readFileSync(path.join(__dirname, '../report.js'), 'utf8'), context);
   const source = fs.readFileSync(path.join(__dirname, '../app.js'), 'utf8');
@@ -22,7 +23,7 @@ function app() {
   return { run: code => vm.runInContext(code, context), nodes };
 }
 
-test('deep dive covers all fifteen pairs with eight distinct topics and grounded evidence', () => {
+test('deep dive covers all fifteen pairs with distinct color and mix readings for eight themes', () => {
   const { run } = app();
   assert.equal(run('Object.keys(DEEP_PAIRS).length'), 15);
   for (const pair of ['BC','BD','BE','BF','BG','CD','CE','CF','CG','DE','DF','DG','EF','EG','FG']) {
@@ -32,7 +33,8 @@ test('deep dive covers all fifteen pairs with eight distinct topics and grounded
     assert.equal(run('dive.options.length'), 1);
     assert.equal(run('new Set(dive.topics.map(t => t.id)).size'), 8);
     assert.equal(run('dive.topics.every(t => t.parts.every(p => p.length === 2 && p.every(text => typeof text === "string" && text.length > 0)))'), true);
-    assert.equal(run('dive.topics.filter(t => t.evidence).length'), 7);
+    assert.equal(run('dive.topics.every(t => t.reading.lenses.length === 2 && t.reading.keywords.length === 2 && t.reading.mix.length === 3)'), true);
+    assert.equal(run('new Set(dive.topics.map(t => t.reading.lenses[0].text)).size'), 8);
     assert.equal(run('dive.topics.find(t => t.figures).figures.length'), 2);
     assert.doesNotMatch(run('JSON.stringify(dive)'), /undefined|NaN/);
   }
@@ -60,23 +62,27 @@ test('single-color concentration never adds an unsupported second color', () => 
   }
 });
 
-test('deep dive differentiates block evidence despite equal global color totals', () => {
+test('deep dive uses the overall mix without presenting local block scores as behavior', () => {
   const { run } = app();
   run('var answers = QUESTIONS.map(() => ({B:1,C:1,D:2,E:4,F:1,G:3})); var first = buildDeepDive(buildSpiralProfile(answers)); answers[7].E=0; answers[7].B=5; answers[0].E=8; answers[0].B=0; answers[1].B=0; answers[2].B=0; answers[3].B=0; answers[0].G=0; answers[1].G=4; answers[2].G=4; answers[3].G=4; var second = buildDeepDive(buildSpiralProfile(answers));');
   assert.equal(run('first.total === second.total'), true);
-  assert.notEqual(run('first.topics[0].evidence.statements.join()'), run('second.topics[0].evidence.statements.join()'));
-  assert.match(run('second.topics[0].evidence.nuance'), /outras cores, juntas, receberam mais/);
+  assert.equal(run('first.topics[0].reading.preview'), run('second.topics[0].reading.preview'));
+  run('var zeroLocal = QUESTIONS.map(() => ({B:0,C:6,D:0,E:0,F:6,G:0})); zeroLocal[7] = {B:0,C:0,D:12,E:0,F:0,G:0}; renderDeepDive(buildSpiralProfile(zeroLocal));');
+  assert.doesNotMatch(run('document.getElementById("deep-dive").innerHTML'), /\d+\/12(?!0)|Nas suas respostas|pontos na frase/);
+  assert.match(run('document.getElementById("deep-dive").innerHTML'), /Afirmação/);
+  assert.match(run('document.getElementById("deep-dive").innerHTML'), /Reciprocidade/);
 });
 
 test('deep dive renderer escapes response text and keeps historical references qualified', () => {
   const { run, nodes } = app();
-  run('var profile = buildSpiralProfile(QUESTIONS.map(() => ({B:3,C:1,D:2,E:2,F:1,G:3}))); QUESTIONS[7].options.find(o => o[0] === "B")[1] = "<img src=x>"; renderDeepDive(profile);');
+  run('var profile = buildSpiralProfile(QUESTIONS.map(() => ({B:3,C:1,D:2,E:2,F:1,G:3}))); DEEP_THEME_LENSES.world.B[3] = "<img src=x>"; renderDeepDive(profile);');
   const html = nodes.get('deep-dive').innerHTML;
   assert.equal((html.match(/class="deep-topic"/g) || []).length, 8);
   assert.match(html, /&lt;img src=x&gt;/);
   assert.doesNotMatch(html, /<img src=x>/);
   assert.match(html, /não estamos atribuindo a elas esse perfil/);
   assert.match(html, /Exemplo de comunicação eficaz/);
+  assert.equal((html.match(/class="deep-map-node"/g) || []).length, 8);
   run('var uniform = buildSpiralProfile(QUESTIONS.map(() => ({B:2,C:2,D:2,E:2,F:2,G:2}))); renderDeepDive(uniform);');
   assert.equal((nodes.get('deep-dive').innerHTML.match(/<option /g) || []).length, 15);
 });

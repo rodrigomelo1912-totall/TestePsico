@@ -36,19 +36,6 @@ function deepDiveOptions(profile) {
   return positive.filter(color => color.points === positive[1].points).map(color => [positive[0].code, color.code]);
 }
 
-function deepDiveEvidence(profile, index, codes) {
-  const block = profile.blocks[index];
-  const share = codes.reduce((sum, code) => sum + block.answer[code], 0);
-  const statements = codes.map(code => {
-    const statement = QUESTIONS[index].options.find(option => option[0] === code)[1];
-    return `${COLORS[code].name}: ${block.answer[code]}/12 pontos na frase “${statement}”`;
-  });
-  const nuance = share === 0 ? "Neste tema, o par não recebeu pontos. A hipótese do mix geral não encontra apoio nesta pergunta."
-    : share < 6 ? `Neste tema, o recorte soma ${share}/12 pontos; as outras cores, juntas, receberam mais espaço. Confira-as antes de aplicar a leitura geral aqui.`
-    : `Neste tema, o recorte soma ${share}/12 pontos. Compare as frases com a hipótese do mix geral; o questionário registra preferências declaradas.`;
-  return { label: block.label, statements, nuance };
-}
-
 function buildDeepDive(profile, requested) {
   const options = deepDiveOptions(profile);
   const codes = requested || options[0];
@@ -64,41 +51,40 @@ function buildDeepDive(profile, requested) {
     : `${colors[0].name} tem ${colors[0].points - colors[1].points} pontos a mais que ${colors[1].name}. A combinação deve ser lida com essa diferença de peso.`;
   const frame = pair || { title: `${names} em concentração integral`, world: `um espaço em que ${colors[0].focus.toLowerCase()} concentra as prioridades desta aplicação`, pain: `Quando a mesma referência recebe todos os pontos, a pergunta é em que situação seria útil considerar outro critério. ${colors[0].question}`, positive: colors[0].resource, negative: "Confiar exclusivamente em uma perspectiva pode deixar condições da situação sem exame. A pontuação não demonstra que isso aconteça; convém buscar um exemplo em que outro critério fez diferença.", style: `Uma possibilidade a explorar é ${lenses[0].leader}. A concentração de pontos não comprova experiência ou eficácia ao liderar.`, management: lenses[0].manager, good: `Vamos combinar o trabalho: ${lenses[0].communication}.`, bad: "Não importa como você prefere trabalhar; apenas execute sem conversar.", friction: "a mensagem fecha a possibilidade de compreender as condições de trabalho" };
   const explain = key => colors.map((color, i) => `${color.name}: ${lenses[i][key]}.`).join(" ");
-  const evidence = index => deepDiveEvidence(profile, index, codes);
   const common = `Esta é uma hipótese de leitura de ${names}, para conferir com exemplos da pessoa. O total das cores não determina um comportamento em todos os contextos.`;
   const topics = [
     { id: "world", title: "Visão sobre o mundo", teaser: `O mundo como ${frame.world}.`, parts: [
       ["O que esse encontro sugere", `Pela lente do mix, é possível enxergar o mundo como ${frame.world}. ${colors.map(c => `${c.name} traz ${c.focus.toLowerCase()} para essa leitura`).join("; ")}. ${balance}`],
       ["Do total para a experiência", `Observe o que chama atenção primeiro numa situação nova: o que precisa ser preservado, a possibilidade de agir ou as condições para compreender o problema. ${pair ? pair.positive : common} A pergunta “Para mim, vida é…” ajuda a verificar se essa leitura aparece também na sua descrição de mundo.`]
-    ], evidence: evidence(7) },
+    ] },
     { id: "dilemma", title: "A grande dor", teaser: "O principal dilema que esta combinação convida a investigar.", parts: [
       ["A tensão central possível", frame.pain],
       ["Como reconhecer na prática", `Procure uma decisão em que atender a uma prioridade pareceu exigir renunciar a outra. ${pair ? frame.negative : common} O ponto a observar é o que você tentou proteger e qual custo aceitou. “Dor”, aqui, nomeia um dilema de valores possível, não sofrimento constatado ou condição clínica.`],
       ["Pergunta para conversar", pair ? COLOR_PAIRS[[...codes].sort().join("")][2] : colors[0].question]
-    ], evidence: evidence(5) },
+    ] },
     { id: "combination", title: "Caracterização da combinação", teaser: "Lados positivos e negativos: possibilidades e excessos a observar.", parts: [
       ["Lado positivo • recursos possíveis", frame.positive],
       ["Lado negativo • quando pesa demais", frame.negative],
       ["O que muda com a proporção", `${balance} ${pair ? `O par reúne ${total} de 120 pontos (${formatPercent(total / 120 * 100)}%); os ${120 - total} pontos restantes pertencem às outras cores. Essa parcela também faz parte da pessoa e pode mudar a leitura em um tema específico.` : "Não há pontuação em outras cores nesta aplicação; isso não comprova ausência das capacidades associadas a elas."} Use as possibilidades positivas como recursos a reconhecer e as negativas como perguntas, não como defeitos atribuídos.`]
-    ], evidence: evidence(0) },
+    ] },
     { id: "leadership", title: "Liderança", teaser: frame.style, parts: [
       ["O líder é… uma possibilidade de atuação", frame.style],
       ["Tipo de tomada de decisão", `${explain("decision")} ${pair ? frame.pain : colors[0].question} Uma prática útil é explicitar os critérios antes de comparar alternativas; assim, uma mudança de posição pode ser compreendida pela equipe.`],
       ["Atitude geral", `${explain("attitude")} Esses movimentos podem se apoiar ou aparecer em momentos diferentes. Procure episódios de direção, escuta e revisão de uma escolha para entender como essa pessoa realmente atua.`],
       ["Estilo de liderança em ação", `${explain("leader")} A combinação sugere perguntas sobre o estilo, mas a qualidade da liderança depende de comportamentos, contexto e retorno da equipe que este questionário não mediu.`]
-    ], evidence: evidence(9) },
+    ] },
     { id: "communication", title: "Gestão e motivação", teaser: "Como orientar, conversar e conferir se a mensagem chegou.", parts: [
       ["Sou mais facilmente gerenciado quando tenho…", frame.management],
       ["Como se comunicar com esse mix", `${explain("communication")} Antes de pressupor que esse formato funciona, pergunte à pessoa o que ajuda e o que dificulta receber uma orientação. ${balance}`],
       ["Exemplo de comunicação eficaz • para testar", frame.good],
       ["Exemplo de comunicação que NÃO funciona • possível atrito", frame.bad],
       ["Por que os exemplos diferem", `No segundo exemplo, ${frame.friction}. O primeiro torna possível conversar sobre necessidades e acordos. São exemplos escritos para esta leitura, não falas da pessoa nem uma garantia de reação.`]
-    ], evidence: evidence(2) },
+    ] },
     { id: "motivation", title: "O que motiva", teaser: "O que pode tornar um compromisso significativo para esta combinação.", parts: [
       [pair ? "Duas fontes de sentido" : "Uma fonte de sentido pontuada", colors.map((color, i) => `${color.name} sugere explorar a importância de ${lenses[i].motive}.`).join(" ")],
-      ["O encontro na rotina", `${pair ? frame.positive : colors[0].meaning} Em vez de escolher uma recompensa apenas pelo nome das cores, retome uma experiência em que houve envolvimento: o que a pessoa pôde decidir, que apoio recebeu e como percebeu sua contribuição? Compare a resposta com as condições de emprego pontuadas abaixo.`],
+      ["O encontro na rotina", `${pair ? frame.positive : colors[0].meaning} Em vez de escolher uma recompensa apenas pelo nome das cores, retome uma experiência em que houve envolvimento: o que a pessoa pôde decidir, que apoio recebeu e como percebeu sua contribuição? Observe como essas prioridades aparecem nessa experiência.`],
       ["Um teste simples", `${lenses.map(lens => lens.experiment).join(". Em paralelo, ")}. Depois, pergunte o que mudou na experiência. Uma ação que não ajuda é um motivo para ajustar a hipótese, não para insistir no rótulo.`]
-    ], evidence: evidence(1) },
+    ] },
     { id: "figures", title: "Figuras famosas que representam ideias do mix", teaser: "Atuações públicas como analogias para pensar, com fontes para aprofundar.", parts: [
       ["Como ler as referências", `As pessoas abaixo ilustram ações associadas a ideias de ${names}. Elas não realizaram este questionário aqui, e não estamos atribuindo a elas esse perfil ou afirmando que representam o par completo. A associação com o mix é uma analogia editorial.`]
     ], figures: lenses.map(lens => lens.figure) },
@@ -107,8 +93,9 @@ function buildDeepDive(profile, requested) {
       ["Desafios ao gerenciar", `${frame.negative} Para investigar, descreva uma situação observável e pergunte como ela foi vivida. Diferencie a intenção de cuidar, organizar ou avançar do efeito que a ação teve em quem participou.`],
       ["Pontos positivos para explorar", `${frame.positive} ${explain("manager")} A utilidade do acordo deve ser conferida com a pessoa e com o trabalho realizado.`],
       ["Do autoconhecimento a um acordo", `Na próxima conversa, peça um exemplo que confirme a leitura e outro que a contrarie. Escolham um ajuste de comunicação ou autonomia para experimentar, combinem quando conversar novamente e registrem o que ajudou. Esse uso apoia desenvolvimento; o mix não é critério de seleção, promoção ou avaliação de competência.`]
-    ], evidence: evidence(3) }
+    ] }
   ];
+  topics.forEach(topic => { topic.reading = deepThemeReading(colors, topic.id); });
   return { colors, codes, options, names, total, balance, ambiguous, title: frame.title, topics };
 }
 
@@ -119,9 +106,9 @@ function renderDeepDive(profile, requested) {
   const tieControl = dive.ambiguous ? `<div class="deep-tie"><label for="deep-pair">Há empate na escolha das duas predominâncias</label><p>O par exibido é um recorte entre opções empatadas, não uma dupla exclusivamente dominante. Trocar o recorte não muda suas respostas.</p><select id="deep-pair">${dive.options.map(option => `<option value="${option.join("")}" ${option.join() === dive.codes.join() ? "selected" : ""}>${optionLabel(option)}</option>`).join("")}</select></div>` : "";
   $("deep-dive").innerHTML = `<div class="chapter-heading"><div><span class="eyebrow">04 / Deep Dive de Alinhamento</span><h2>Seu mix em profundidade.<br><em>Da leitura à conversa.</em></h2></div><p>Explore a relação entre suas prioridades e possíveis formas de agir, liderar e se comunicar. Alinhamento, aqui, é compreender como esses valores se encontram na experiência.</p></div>
     <div class="deep-cover"><div><span class="eyebrow">${dive.ambiguous ? "Recorte entre cores empatadas" : dive.colors.length === 1 ? "Uma perspectiva pontuada" : "Suas duas maiores pontuações"}</span><h3>${escape(dive.title)}</h3><p>${escape(dive.balance)}</p><p class="deep-caption">Leitura exploratória baseada nos pontos. Confira cada hipótese com as respostas e com exemplos reais.</p></div><div class="deep-colors">${dive.colors.map(color => `<div><span><i style="background:${color.hex}"></i>${color.name}</span><strong>${color.points}<small>/120</small></strong><div class="deep-track"><span style="width:${color.percent}%;background:${color.hex}"></span></div><small>${formatPercent(color.percent)}% dos pontos totais</small></div>`).join("")}</div></div>
-    ${tieControl}<nav class="deep-contents" aria-label="Temas do Deep Dive">${dive.topics.map((topic, i) => `<a href="#deep-${topic.id}" data-deep-open="deep-${topic.id}">${String(i + 1).padStart(2, "0")} ${escape(topic.title)}</a>`).join("")}</nav>
-    <div class="deep-topics">${dive.topics.map((topic, i) => `<details class="deep-topic" id="deep-${topic.id}" ${i === 0 ? "open" : ""}><summary><span class="deep-number">${String(i + 1).padStart(2, "0")}</span><span><strong>${escape(topic.title)}</strong><span class="deep-teaser">${escape(topic.teaser)}</span></span><span class="deep-plus" aria-hidden="true">+</span></summary><div class="deep-topic-body">${topic.parts.map(([label, text]) => `<section class="deep-part"><h4>${escape(label)}</h4><p>${escape(text)}</p></section>`).join("")}${topic.figures ? `<div class="deep-figures">${topic.figures.map(figure => `<article><h4>${escape(figure.name)}</h4><p>${escape(figure.action)}</p><p>${escape(figure.bridge)}</p><a href="${figure.url}" target="_blank" rel="noopener noreferrer">Ler na fonte: ${escape(figure.source)} ↗</a></article>`).join("")}</div>` : ""}${topic.evidence ? `<aside class="deep-evidence"><span class="eyebrow">Nas suas respostas • ${escape(topic.evidence.label)}</span>${topic.evidence.statements.map(text => `<p>${escape(text)}</p>`).join("")}<p class="deep-evidence-note">${escape(topic.evidence.nuance)}</p></aside>` : ""}</div></details>`).join("")}</div>`;
+    ${tieControl}${renderDeepMap(dive)}
+    <div class="deep-topics">${dive.topics.map((topic, i) => `<details class="deep-topic" id="deep-${topic.id}" ${i === 0 ? "open" : ""}><summary><span class="deep-number">${String(i + 1).padStart(2, "0")}</span><span><strong>${escape(topic.title)}</strong><span class="deep-teaser">${escape(topic.teaser)}</span></span><span class="deep-plus" aria-hidden="true">+</span></summary><div class="deep-topic-body">${topic.parts.map(([label, text]) => `<section class="deep-part"><h4>${escape(label)}</h4><p>${escape(text)}</p></section>`).join("")}${topic.figures ? `<div class="deep-figures">${topic.figures.map(figure => `<article><h4>${escape(figure.name)}</h4><p>${escape(figure.action)}</p><p>${escape(figure.bridge)}</p><a href="${figure.url}" target="_blank" rel="noopener noreferrer">Ler na fonte: ${escape(figure.source)} ↗</a></article>`).join("")}</div>` : ""}${renderDeepThemeReading(topic.reading)}</div></details>`).join("")}</div>`;
   const pairSelect = $("deep-pair");
   if (dive.ambiguous) pairSelect.addEventListener("change", event => renderDeepDive(profile, [...event.target.value]));
-  document.querySelectorAll("[data-deep-open]").forEach(link => link.addEventListener("click", () => { $(link.dataset.deepOpen).open = true; }));
+  initializeDeepMap();
 }
