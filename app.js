@@ -355,7 +355,10 @@ $("export-html").addEventListener("click", () => {
   report.classList.add("active");
   report.querySelectorAll(".report-nav, dialog, .result-actions").forEach(node => node.remove());
   const css = document.querySelector('link[href*="styles.css"]')?.href || "styles.css";
-  fetch(css).then(response => response.text()).then(styles => {
+  const inlineImage = image => fetch(image.src).then(response => response.blob()).then(blob => new Promise(resolve => {
+    const reader = new FileReader(); reader.onload = () => resolve(reader.result); reader.readAsDataURL(blob);
+  }));
+  Promise.all([...report.querySelectorAll("img[src]")].map(async image => { image.src = await inlineImage(image); })).then(() => fetch(css)).then(response => response.text()).then(styles => {
     const html = `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Perfil Psicológico | Verium</title><style>${styles}</style></head><body class="report-mode"><main>${report.outerHTML}</main><script>document.querySelectorAll('details').forEach(item => item.addEventListener('toggle', () => item.classList.toggle('is-open', item.open)));<\/script></body></html>`;
     const blob = new Blob([html], { type: "text/html;charset=utf-8" });
     const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = "perfil-psicologico.html"; link.click();
