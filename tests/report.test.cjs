@@ -13,6 +13,7 @@ function app() {
     } }
   });
   vm.runInContext(fs.readFileSync(path.join(__dirname, '../spiral.js'), 'utf8'), context);
+  vm.runInContext(fs.readFileSync(path.join(__dirname, '../dimension-mix.js'), 'utf8'), context);
   vm.runInContext(fs.readFileSync(path.join(__dirname, '../report.js'), 'utf8'), context);
   const source = fs.readFileSync(path.join(__dirname, '../app.js'), 'utf8');
   vm.runInContext(source.slice(0, source.indexOf('$("profile-form").addEventListener')), context);
@@ -102,4 +103,37 @@ test('pair narratives distinguish separate contexts from shared scores', () => {
   assert.match(run('pairReading(profile,"B","C").paragraphs.join(" ")'), /temas diferentes/);
   assert.match(run('pairReading(profile,"D","E").paragraphs.join(" ")'), /não sustentam interpretar/);
   assert.equal(run('pairReading(profile,"B","C").sections.length'), 2);
+});
+
+test('dimension synthesis explains actual rules priorities and preserves tied leaders', () => {
+  const { run } = app();
+  run('var profile = buildSpiralProfile(QUESTIONS.map(() => ({B:3,C:1,D:2,E:2,F:1,G:3})))');
+  const rules = run('dimensionMixAnalysis(profile,5).join("\\n")');
+  assert.match(rules, /Púrpura \+ Amarelo compartilham/);
+  assert.match(rules, /Proteção e responsabilidade pessoal/);
+  assert.match(rules, /Azul \(2\/12; 16,7%\)/);
+  assert.match(rules, /Laranja \(2\/12; 16,7%\)/);
+  assert.doesNotMatch(rules, /cor líder|peso menor|12 respostas|participantes/);
+  const money = run('dimensionMixAnalysis(profile,8).join("\\n")');
+  assert.match(money, /alimentação e moradia/);
+  assert.doesNotMatch(money, /Proteção e responsabilidade pessoal/);
+});
+
+test('synthesis adapts to score changes and does not mislabel a plurality as majority', () => {
+  const { run } = app();
+  run('var profile = buildSpiralProfile(QUESTIONS.map(() => ({B:1,C:1,D:3,E:4,F:1,G:2})))');
+  const first = run('dimensionMixAnalysis(profile,5).join(" ")');
+  assert.match(first, /não ultrapassa metade/);
+  assert.match(first, /Ordem e progresso/);
+  run('profile = buildSpiralProfile(QUESTIONS.map(() => ({B:3,C:1,D:2,E:2,F:1,G:3})))');
+  assert.notEqual(first, run('dimensionMixAnalysis(profile,5).join(" ")'));
+});
+
+test('every dimension handles uniform, single-color and paired distributions without mutating scores', () => {
+  const { run } = app();
+  run('var fixtures = [{B:2,C:2,D:2,E:2,F:2,G:2}, {B:4,C:4,D:4,E:0,F:0,G:0}]; for (var a of Object.keys(COLORS)) { var single = {B:0,C:0,D:0,E:0,F:0,G:0}; single[a]=12; fixtures.push(single); for(var b of Object.keys(COLORS)) { if(a<b) {var pair={...single};pair[a]=6;pair[b]=6;fixtures.push(pair);} } }');
+  assert.equal(run('fixtures.every(answer => { const profile=buildSpiralProfile(QUESTIONS.map(()=>({...answer}))); const before=JSON.stringify(profile); return profile.blocks.every((_,i)=> {const text=dimensionMixAnalysis(profile,i).join(" ");return text.length>500 && !/undefined|NaN/.test(text);}) && before===JSON.stringify(profile); })'), true);
+  run('var uniform = buildSpiralProfile(QUESTIONS.map(()=>({B:2,C:2,D:2,E:2,F:2,G:2})))');
+  assert.match(run('dimensionMixAnalysis(uniform,5).join(" ")'), /não permite destacar um critério principal/);
+  assert.doesNotMatch(run('dimensionMixAnalysis(uniform,5).join(" ")'), /cor líder|segunda cor/);
 });

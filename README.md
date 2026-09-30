@@ -33,6 +33,8 @@ node --test tests/report.test.cjs
 
 - `app.js`: questionario, pontuacao e persistencia.
 - `spiral.js`: calculos exatos, empates e hipoteses editoriais dos cruzamentos.
+- `dimension-mix.js`: sintese contextual por dimensao, com interpretacao das frases,
+  proporcoes, empates e combinacoes; sem alterar os calculos do questionario.
 - `report.js`: apresentacao do relatorio, evidencias e movimento.
 - `styles.css`: identidade Verium, layouts responsivos e impressao.
 - `assets/logo-verium-original.svg`: logo vetorial extraida do PDF fornecido.
