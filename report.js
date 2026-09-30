@@ -55,8 +55,27 @@ function renderPairReading(a, b) {
   updateMotion();
 }
 
+function dimensionColorAnalysis(profile, index, code) {
+  const color = profile.colors.find(item => item.code === code);
+  const points = profile.blocks[index].answer[code];
+  const statement = QUESTIONS[index].options.find(option => option[0] === code)[1];
+  if (points === 0) return `Nesta dimensão, nenhuma das 12 respostas foi atribuída a ${color.name}. Isso indica que a frase ficou fora da prioridade escolhida nesta pergunta; não significa ausência de ${color.focus.toLowerCase()} em outras situações. A pergunta de reflexão é: ${color.question}`;
+  if (points === 12) return `As 12 respostas desta dimensão foram atribuídas a ${color.name}, portanto esta perspectiva ocupa 100% do share do bloco. A frase “${statement}” foi a única referência escolhida nesta pergunta. Pela lente da Espiral, isso coloca ${color.focus.toLowerCase()} no centro desta dimensão; vale observar o contexto que tornou essa referência tão dominante. ${color.question}`;
+  return `${points} de 12 respostas (${formatPercent(points / 12 * 100)}%) foram atribuídas a ${color.name}. A frase “${statement}” expressa como ${color.focus.toLowerCase()} aparece nesta dimensão. ${color.meaning} O share mostra prioridade relativa entre as alternativas apresentadas, não um traço isolado ou definitivo. ${color.question}`;
+}
+
 function answerRows(profile, index) {
-  return QUESTIONS[index].options.map(([code, text]) => `<div class="answer-evidence-row"><span class="color-dot" style="--color:${COLORS[code].hex}"></span><div><strong>${COLORS[code].name}</strong><p>${escapeHTML(text)}</p></div><b>${profile.blocks[index].answer[code]}<small>/12</small></b></div>`).join("");
+  return QUESTIONS[index].options.map(([code, text]) => `<details class="answer-detail"><summary class="answer-evidence-row"><span class="color-dot" style="--color:${COLORS[code].hex}"></span><div><strong>${COLORS[code].name}</strong><p>${escapeHTML(text)}</p></div><b>${profile.blocks[index].answer[code]}<small>/12</small></b><span class="answer-cta">Abrir leitura <span aria-hidden="true">+</span></span></summary><div class="answer-detail-copy"><span class="eyebrow">Como esta cor atua nesta dimensão</span><p>${escapeHTML(dimensionColorAnalysis(profile, index, code))}</p></div></details>`).join("");
+}
+
+function dimensionMixAnalysis(profile, index) {
+  const block = profile.blocks[index];
+  const ranked = profile.colors.filter(color => block.answer[color.code] > 0).sort((a, b) => block.answer[b.code] - block.answer[a.code]);
+  if (!ranked.length) return "Nenhuma cor recebeu pontos neste bloco, o que não deveria ocorrer em uma distribuição válida de 12 pontos.";
+  if (ranked.length === 1) return `${ranked[0].name} concentra as 12 respostas desta dimensão. O mix, neste caso, é de concentração integral: as demais perspectivas não receberam prioridade nesta pergunta. Isso descreve a forma como esta questão foi respondida, não uma hierarquia de valor entre as cores.`;
+  const lead = ranked[0], second = ranked[1];
+  const spread = ranked.map(color => `${color.name} ${block.answer[color.code]}/12`).join(", ");
+  return `O mix desta dimensão é ${spread}. ${lead.name} lidera com ${block.answer[lead.code]}/12 (${formatPercent(block.answer[lead.code] / 12 * 100)}%), enquanto ${second.name} aparece com ${block.answer[second.code]}/12 (${formatPercent(block.answer[second.code] / 12 * 100)}%). As demais cores completam a distribuição. Isso sugere que a resposta combina referências em proporções diferentes: a cor líder organiza a maior parte da prioridade, e as outras mostram o espaço relativo dado a perspectivas complementares ou concorrentes nesta pergunta. O sentido do mix está na relação entre as cores e no contexto da dimensão, não em uma cor isolada.`;
 }
 
 function polarPoint(cx, cy, radius, angle) {
@@ -122,7 +141,7 @@ function renderAnswerEvidence(profile) {
 
 function renderBlockEvidence(index) {
   const block = currentReport.blocks[index];
-  $("block-evidence").innerHTML = `<span class="eyebrow">Bloco ${index + 1} / ${block.label}</span><h3>${QUESTIONS[index].title}</h3><p>${block.leaders.length > 1 ? "Empate entre" : "Maior pontuação em"} ${block.leaders.map(code => COLORS[code].name).join(" + ")}: ${block.peak} pontos ${block.leaders.length > 1 ? "cada" : ""}.</p>${answerRows(currentReport, index)}`;
+  $("block-evidence").innerHTML = `<span class="eyebrow">Bloco ${index + 1} / ${block.label}</span><h3>${QUESTIONS[index].title}</h3><p>${block.leaders.length > 1 ? "Empate entre" : "Maior pontuação em"} ${block.leaders.map(code => COLORS[code].name).join(" + ")}: ${block.peak} pontos ${block.leaders.length > 1 ? "cada" : ""}.</p><p class="detail-instruction">Abra cada cor para entender o que a frase representa nesta dimensão.</p>${answerRows(currentReport, index)}<section class="dimension-mix"><span class="eyebrow">Síntese da dimensão</span><h4>Leitura do mix das cores</h4><p>${escapeHTML(dimensionMixAnalysis(currentReport, index))}</p></section>`;
   document.querySelectorAll("[data-block]").forEach(button => button.setAttribute("aria-pressed", String(Number(button.dataset.block) === index)));
 }
 
