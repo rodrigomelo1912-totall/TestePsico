@@ -228,6 +228,23 @@
     <div class="export-options"><button id="export-pdf" class="primary-button" type="button"><strong>PDF</strong><span>Imprimir ou salvar como PDF</span></button><button id="export-image" class="secondary-button" type="button"><strong>Imagem</strong><span>Baixar uma imagem do relatório</span></button><button id="export-html" class="secondary-button" type="button"><strong>HTML</strong><span>Baixar uma página independente</span></button></div>
   </dialog>
 
+  <dialog id="contact-dialog" class="contact-dialog" aria-labelledby="contact-title">
+    <form id="contact-form">
+      <span class="eyebrow">Antes do seu resultado</span>
+      <h2 id="contact-title">Para quem é este perfil?</h2>
+      <p>Confirme seus dados para identificar o laudo.</p>
+      <div class="contact-fields">
+        <label>Nome<input id="contact-name" name="contactName" autocomplete="name" required></label>
+        <label>E-mail<input id="contact-email" name="contactEmail" type="email" autocomplete="email" required></label>
+        <label>Celular<input id="contact-phone" name="contactPhone" type="tel" autocomplete="tel" inputmode="tel" required></label>
+        <label>Empresa<input id="contact-company" name="contactCompany" autocomplete="organization" required></label>
+        <label>Cargo<input id="contact-job-title" name="contactJobTitle" autocomplete="organization-title" required></label>
+      </div>
+      <p class="privacy-note">Seus dados ficam salvos neste navegador junto das respostas.</p>
+      <button class="primary-button contact-submit" type="submit">Ver meu resultado <span aria-hidden="true">→</span></button>
+    </form>
+  </dialog>
+
   <dialog id="spiral-dialog" class="spiral-dialog" aria-labelledby="spiral-title">
     <div class="dialog-heading"><span class="eyebrow">Conheça a Espiral</span><button id="close-spiral" class="secondary-button" type="button">Fechar</button></div>
     <h2 id="spiral-title">Diferentes formas de perceber.<br><em>Mais de uma pode viver em você.</em></h2>

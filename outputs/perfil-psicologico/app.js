@@ -64,7 +64,8 @@ const QUESTIONS = [
 const state = {
   profile: {
     name: "", roleArea: "", responsibilities: "", timeFocus: "", challenge: "",
-    difficultDecision: "", pressure: "", strengthsDevelopment: "", goals: ""
+    difficultDecision: "", pressure: "", strengthsDevelopment: "", goals: "",
+    email: "", phone: "", company: "", jobTitle: ""
   },
   introCurrent: 0,
   current: 0,
@@ -124,6 +125,16 @@ function populateProfile() {
   Object.entries(profileFields).forEach(([key, id]) => {
     if ($(id)) $(id).value = state.profile[key] || "";
   });
+}
+
+function openContactDialog() {
+  $("contact-name").value = state.profile.name || "";
+  $("contact-email").value = state.profile.email || "";
+  $("contact-phone").value = state.profile.phone || "";
+  $("contact-company").value = state.profile.company || "";
+  $("contact-job-title").value = state.profile.jobTitle || state.profile.roleArea || "";
+  $("contact-dialog").showModal();
+  $("contact-name").focus();
 }
 
 function restore() {
@@ -222,7 +233,7 @@ function renderResults() {
   renderPanoramaReading(profile);
   $("total-score").textContent = `${profile.total} pontos`;
   $("cover-name").textContent = state.profile.name;
-  $("cover-role").textContent = "Leitura individual da Espiral de Valores";
+  $("cover-role").textContent = [state.profile.jobTitle, state.profile.company].filter(Boolean).join(" · ") || "Leitura individual da Espiral de Valores";
   $("cover-summary").textContent = "Um retrato das prioridades expressas no questionário: os valores que aparecem, suas combinações e as diferenças entre os temas. Cada interpretação começa nas suas respostas.";
   $("cover-donut").innerHTML = renderDonut(data, "Distribuição dos 120 pontos nas seis perspectivas de valores");
   $("report-date").textContent = `Emitido em ${new Date().toLocaleDateString("pt-BR")} · Espiral de Valores`;
@@ -340,9 +351,23 @@ $("next-button").addEventListener("click", () => {
     renderQuestion();
     persist();
   } else {
-    renderResults();
-    showScreen("results-screen");
+    openContactDialog();
   }
+});
+
+$("contact-form").addEventListener("submit", event => {
+  event.preventDefault();
+  if (!event.currentTarget.reportValidity()) return;
+  state.profile.name = $("contact-name").value.trim();
+  state.profile.email = $("contact-email").value.trim();
+  state.profile.phone = $("contact-phone").value.trim();
+  state.profile.company = $("contact-company").value.trim();
+  state.profile.jobTitle = $("contact-job-title").value.trim();
+  $("header-person").textContent = state.profile.name;
+  persist();
+  $("contact-dialog").close();
+  renderResults();
+  showScreen("results-screen");
 });
 
 $("save-exit").addEventListener("click", () => { persist(); showScreen("welcome-screen"); });
