@@ -234,6 +234,7 @@ function renderResults() {
   renderRadar(data);
   renderProfileInsights(profile);
   renderColorCrossings(profile);
+  renderDeepDive(profile);
   renderAnswerEvidence(profile);
   $("level-details").innerHTML = profile.ranked.map(item => `<article class="level-card">
     <div class="level-head"><div class="level-name"><span class="color-dot" style="--color:${item.hex}"></span>${item.name}</div><strong>${formatPercent(item.percent)}%</strong></div>

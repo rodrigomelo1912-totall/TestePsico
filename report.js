@@ -119,7 +119,7 @@ function renderRadialInsight(index) {
 function renderAnswerEvidence(profile) {
   const legend = profile.colors.map(item => `<span><i style="background:${item.hex}"></i>${item.name}</span>`).join("");
   $("answer-evidence").innerHTML = `
-    <div class="chapter-heading"><div><span class="eyebrow">04 / Respostas que sustentam a leitura</span><h2>O total mostra o conjunto.<br><em>Os blocos mostram as diferenças.</em></h2></div><p>Cada linha contém 12 pontos. Selecione um tema para ver as afirmações e conferir de onde veio a distribuição. São comparações entre respostas, não uma medida de estabilidade emocional.</p></div>
+    <div class="chapter-heading"><div><span class="eyebrow">05 / Respostas que sustentam a leitura</span><h2>O total mostra o conjunto.<br><em>Os blocos mostram as diferenças.</em></h2></div><p>Cada linha contém 12 pontos. Selecione um tema para ver as afirmações e conferir de onde veio a distribuição. São comparações entre respostas, não uma medida de estabilidade emocional.</p></div>
     <div class="block-legend">${legend}</div>
     ${radialDimensionMap(profile)}
     <section id="block-evidence" class="block-evidence" aria-live="polite"></section>

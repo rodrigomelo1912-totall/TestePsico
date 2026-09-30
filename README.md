@@ -9,6 +9,8 @@ Aplicacao estatica de autoconhecimento profissional baseada na Espiral de Valore
 - Letras e cores do gabarito ocultas durante o questionario.
 - Identidade visual Verium, com conteudo restrito ao questionario de valores.
 - Matriz, radar, 15 cruzamentos de cores e mapa interativo dos dez blocos.
+- Deep Dive de Alinhamento: oito temas a partir das duas maiores pontuacoes,
+  com empates explicitos, exemplos de comunicacao e evidencias das respostas.
 - Janela introdutoria sobre a Espiral e memoria das 60 respostas.
 - Navegacao por teclado, preferencia de movimento reduzido e pausa de animacoes.
 - Impressao/PDF com pontuacoes, interpretacoes e detalhamentos.
@@ -36,6 +38,8 @@ node --test tests/report.test.cjs
 - `dimension-mix.js`: sintese contextual por dimensao, com interpretacao das frases,
   proporcoes, empates e combinacoes; sem alterar os calculos do questionario.
 - `report.js`: apresentacao do relatorio, evidencias e movimento.
+- `deep-dive.js`: leituras editoriais dos 15 pares, concentracao em uma cor e
+  analogias historicas com fontes, sem atribuir perfis a figuras publicas.
 - `styles.css`: identidade Verium, layouts responsivos e impressao.
 - `assets/logo-verium-original.svg`: logo vetorial extraida do PDF fornecido.
 - `assets/logo-verium.svg`: composicao horizontal dos mesmos elementos vetoriais.

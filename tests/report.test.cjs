@@ -8,18 +8,78 @@ function app() {
   const nodes = new Map();
   const context = vm.createContext({
     document: { querySelectorAll: () => [], getElementById(id) {
-      if (!nodes.has(id)) nodes.set(id, { innerHTML: '', textContent: '' });
+      if (!nodes.has(id)) nodes.set(id, { innerHTML: '', textContent: '', addEventListener() {} });
       return nodes.get(id);
     } }
   });
   vm.runInContext(fs.readFileSync(path.join(__dirname, '../spiral.js'), 'utf8'), context);
   vm.runInContext(fs.readFileSync(path.join(__dirname, '../dimension-mix.js'), 'utf8'), context);
+  vm.runInContext(fs.readFileSync(path.join(__dirname, '../deep-dive.js'), 'utf8'), context);
   vm.runInContext(fs.readFileSync(path.join(__dirname, '../report.js'), 'utf8'), context);
   const source = fs.readFileSync(path.join(__dirname, '../app.js'), 'utf8');
   vm.runInContext(source.slice(0, source.indexOf('$("profile-form").addEventListener')), context);
   vm.runInContext('updateMotion = () => {};', context);
   return { run: code => vm.runInContext(code, context), nodes };
 }
+
+test('deep dive covers all fifteen pairs with eight distinct topics and grounded evidence', () => {
+  const { run } = app();
+  assert.equal(run('Object.keys(DEEP_PAIRS).length'), 15);
+  for (const pair of ['BC','BD','BE','BF','BG','CD','CE','CF','CG','DE','DF','DG','EF','EG','FG']) {
+    run(`var answers = QUESTIONS.map(() => Object.fromEntries(Object.keys(COLORS).map(code => [code, '${pair}'.includes(code) ? 6 : 0]))); var dive = buildDeepDive(buildSpiralProfile(answers));`);
+    assert.equal(run('dive.topics.length'), 8, pair);
+    assert.equal(run('dive.total'), 120);
+    assert.equal(run('dive.options.length'), 1);
+    assert.equal(run('new Set(dive.topics.map(t => t.id)).size'), 8);
+    assert.equal(run('dive.topics.every(t => t.parts.every(p => p.length === 2 && p.every(text => typeof text === "string" && text.length > 0)))'), true);
+    assert.equal(run('dive.topics.filter(t => t.evidence).length'), 7);
+    assert.equal(run('dive.topics.find(t => t.figures).figures.length'), 2);
+    assert.doesNotMatch(run('JSON.stringify(dive)'), /undefined|NaN/);
+  }
+});
+
+test('deep dive preserves top ties and second-place ties without inventing a winner', () => {
+  const { run } = app();
+  run('var profile = buildSpiralProfile(QUESTIONS.map(() => ({B:2,C:2,D:2,E:2,F:2,G:2})))');
+  assert.equal(run('buildDeepDive(profile).options.length'), 15);
+  assert.equal(run('buildDeepDive(profile).ambiguous'), true);
+  run('var profile = buildSpiralProfile(QUESTIONS.map(() => ({B:1,C:1,D:3,E:4,F:0,G:3})))');
+  assert.equal(run('deepDiveOptions(profile).map(pair => pair.join("")).join(",")'), 'ED,EG');
+  assert.equal(run('buildDeepDive(profile,["E","G"]).names'), 'Laranja + Amarelo');
+  assert.throws(() => run('buildDeepDive(profile,["B","C"])'));
+});
+
+test('single-color concentration never adds an unsupported second color', () => {
+  const { run } = app();
+  for (const code of 'BCDEFG') {
+    run(`var profile = buildSpiralProfile(QUESTIONS.map(() => Object.fromEntries(Object.keys(COLORS).map(c => [c,c === '${code}' ? 12 : 0])))); var dive = buildDeepDive(profile);`);
+    assert.equal(run('dive.colors.length'), 1);
+    assert.equal(run('dive.topics.length'), 8);
+    assert.match(run('dive.balance'), /Não há uma segunda cor/);
+    assert.doesNotMatch(run('JSON.stringify(dive)'), /undefined|NaN|Duas fontes/);
+  }
+});
+
+test('deep dive differentiates block evidence despite equal global color totals', () => {
+  const { run } = app();
+  run('var answers = QUESTIONS.map(() => ({B:1,C:1,D:2,E:4,F:1,G:3})); var first = buildDeepDive(buildSpiralProfile(answers)); answers[7].E=0; answers[7].B=5; answers[0].E=8; answers[0].B=0; answers[1].B=0; answers[2].B=0; answers[3].B=0; answers[0].G=0; answers[1].G=4; answers[2].G=4; answers[3].G=4; var second = buildDeepDive(buildSpiralProfile(answers));');
+  assert.equal(run('first.total === second.total'), true);
+  assert.notEqual(run('first.topics[0].evidence.statements.join()'), run('second.topics[0].evidence.statements.join()'));
+  assert.match(run('second.topics[0].evidence.nuance'), /outras cores, juntas, receberam mais/);
+});
+
+test('deep dive renderer escapes response text and keeps historical references qualified', () => {
+  const { run, nodes } = app();
+  run('var profile = buildSpiralProfile(QUESTIONS.map(() => ({B:3,C:1,D:2,E:2,F:1,G:3}))); QUESTIONS[7].options.find(o => o[0] === "B")[1] = "<img src=x>"; renderDeepDive(profile);');
+  const html = nodes.get('deep-dive').innerHTML;
+  assert.equal((html.match(/class="deep-topic"/g) || []).length, 8);
+  assert.match(html, /&lt;img src=x&gt;/);
+  assert.doesNotMatch(html, /<img src=x>/);
+  assert.match(html, /não estamos atribuindo a elas esse perfil/);
+  assert.match(html, /Exemplo de comunicação eficaz/);
+  run('var uniform = buildSpiralProfile(QUESTIONS.map(() => ({B:2,C:2,D:2,E:2,F:2,G:2}))); renderDeepDive(uniform);');
+  assert.equal((nodes.get('deep-dive').innerHTML.match(/<option /g) || []).length, 15);
+});
 
 test('ten completed blocks preserve 120 points and original letter mapping', () => {
   const { run } = app();
