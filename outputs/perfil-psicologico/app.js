@@ -351,9 +351,16 @@ $("export-button").addEventListener("click", () => $("export-dialog").showModal(
 $("close-export").addEventListener("click", () => $("export-dialog").close());
 $("export-pdf").addEventListener("click", () => { $("export-dialog").close(); window.print(); });
 $("export-html").addEventListener("click", () => {
-  const blob = new Blob([`<!doctype html>\n${document.documentElement.outerHTML}`], { type: "text/html;charset=utf-8" });
-  const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = "perfil-psicologico.html"; link.click();
-  URL.revokeObjectURL(link.href); $("export-dialog").close();
+  const report = $("results-screen").cloneNode(true);
+  report.classList.add("active");
+  report.querySelectorAll(".report-nav, dialog, .result-actions").forEach(node => node.remove());
+  const css = document.querySelector('link[href*="styles.css"]')?.href || "styles.css";
+  fetch(css).then(response => response.text()).then(styles => {
+    const html = `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Perfil Psicológico | Verium</title><style>${styles}</style></head><body class="report-mode"><main>${report.outerHTML}</main><script>document.querySelectorAll('details').forEach(item => item.addEventListener('toggle', () => item.classList.toggle('is-open', item.open)));<\/script></body></html>`;
+    const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+    const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = "perfil-psicologico.html"; link.click();
+    URL.revokeObjectURL(link.href); $("export-dialog").close();
+  });
 });
 $("export-image").addEventListener("click", async () => {
   const report = $("results-screen");
