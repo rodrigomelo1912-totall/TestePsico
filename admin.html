@@ -2,25 +2,57 @@
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Painel de Tokens | Verium Rota2B</title>
-  <link rel="stylesheet" href="styles.css?v=fit-1">
+  <title>Painel Administrativo | Verium Rota2B</title>
+  <link rel="stylesheet" href="styles.css?v=connections-1">
 </head>
 <body class="admin-body">
   <main class="admin-shell">
-    <header class="admin-header"><a class="brand" href="index.html"><img src="assets/logo-verium.svg?v=rota2b-1" alt="Verium Rota2B / HUB" width="184" height="50"></a><span>Painel de tokens e laudos</span></header>
+    <header class="admin-header"><a class="brand" href="index.html"><img src="assets/logo-verium.svg?v=rota2b-1" alt="Verium Rota2B / HUB" width="184" height="50"></a><span>Painel administrativo</span></header>
     <section id="admin-login" class="admin-card">
       <span class="eyebrow">Acesso restrito</span><h1>Gerencie seus tokens.</h1><p>Entre para criar acessos e acompanhar os dados capturados antes da liberação dos laudos.</p>
       <form id="admin-login-form"><label>E-mail<input id="admin-email" type="email" autocomplete="email" value="rodrigomelo1912@gmail.com" required></label><label>Senha<input id="admin-password" type="password" autocomplete="current-password" required></label><button class="primary-button" type="submit">Entrar <span>→</span></button></form>
       <button id="admin-create-access" class="text-button" type="button">Criar meu acesso inicial</button><p id="admin-status" class="admin-status" aria-live="polite"></p>
     </section>
-    <section id="admin-dashboard" hidden>
-      <div class="admin-title"><div><span class="eyebrow">Verium / Rota2B</span><h1>Gestão de acessos.</h1></div><button id="admin-logout" class="secondary-button" type="button">Sair</button></div>
+    <section id="admin-dashboard" class="admin-layout" hidden>
+      <aside class="admin-sidebar" aria-label="Navegação do painel">
+        <div><span class="eyebrow">Painel Verium</span><strong>Seu centro de controle.</strong></div>
+        <nav aria-label="Áreas administrativas">
+          <button type="button" class="admin-nav-button active" data-admin-view="access" aria-controls="admin-access-view" aria-current="page"><span>01</span>Gestão de acessos</button>
+          <button type="button" class="admin-nav-button" data-admin-view="connections" aria-controls="admin-connections-view"><span>02</span>Conexões</button>
+        </nav>
+        <p>Tokens, laudos e uso da IA em espaços separados.</p>
+        <button id="admin-logout" class="secondary-button" type="button">Sair do painel</button>
+      </aside>
+      <div class="admin-main">
+      <p id="dashboard-status" class="admin-status" role="status" aria-live="polite"></p>
+      <section id="admin-access-view" class="admin-view">
+      <div class="admin-title"><div><span class="eyebrow">01 / Controle</span><h1>Gestão de acessos.</h1><p>Emita tokens e acompanhe os laudos liberados.</p></div></div>
       <div class="admin-grid"><section class="admin-card"><span class="eyebrow">Lote de tokens</span><h2>Libere novos laudos.</h2><p>Identifique para quem os acessos foram emitidos e gere um ou vários tokens de uma vez.</p><form id="token-batch-form" class="token-batch-form"><label>Nome de referência<input id="batch-recipient-name" autocomplete="name" placeholder="Ex.: Ana Silva" required></label><label>Empresa<input id="batch-company" autocomplete="organization" placeholder="Ex.: Empresa Exemplo" required></label><label>Quantidade de tokens<input id="batch-quantity" type="number" min="1" max="100" value="1" required></label><button id="new-token" class="primary-button" type="submit">Gerar tokens <span>+</span></button></form><div id="generated-token" class="generated-token" hidden></div><button id="copy-token" class="text-button" type="button" hidden>Copiar tokens</button></section><section class="admin-card"><span class="eyebrow">Registros</span><h2>Dados centralizados.</h2><p>Os contatos aparecem assim que um token é utilizado para liberar um laudo.</p></section></div>
       <section class="admin-card admin-table-card"><div class="table-heading"><div><span class="eyebrow">Controle</span><h2>Tokens emitidos</h2></div><span id="token-count" class="table-count"></span></div><div class="token-filters" aria-label="Filtros de tokens"><label>Nome<input id="filter-name" type="search" placeholder="Buscar referência"></label><label>Empresa<input id="filter-company" type="search" placeholder="Buscar empresa"></label><label>Status<select id="filter-status"><option value="">Todos</option><option value="active">Ativo</option><option value="used">Usado</option><option value="revoked">Revogado</option></select></label><label>De<input id="filter-start-date" type="date"></label><label>Até<input id="filter-end-date" type="date"></label><button id="clear-token-filters" class="secondary-button" type="button">Limpar</button></div><div class="admin-table-wrap"><table><thead><tr><th>Final</th><th>Referência</th><th>Empresa</th><th>Status</th><th>Emitido</th><th>Usado</th><th></th></tr></thead><tbody id="token-list"></tbody></table></div></section>
       <section class="admin-card admin-table-card"><h2>Laudos liberados</h2><div class="admin-table-wrap"><table><thead><tr><th>Pessoa</th><th>Celular</th><th>Empresa</th><th>Cargo</th><th>Token</th><th>Data</th><th>Resultado</th></tr></thead><tbody id="submission-list"></tbody></table></div></section>
+      </section>
+      <section id="admin-connections-view" class="admin-view" hidden>
+        <div class="admin-title"><div><span class="eyebrow">02 / Integração</span><h1>Conexões.</h1><p>Acompanhe as chamadas feitas por este diagnóstico à OpenAI API.</p></div><button id="refresh-connections" class="secondary-button" type="button">Atualizar dados</button></div>
+        <div class="connection-overview admin-card"><div><span class="eyebrow">OpenAI API</span><h2 id="connection-state">Verificando conexão...</h2><p id="connection-description">Consultando a função segura no Supabase.</p></div><div class="connection-pulse" aria-hidden="true"><span></span></div><div class="connection-meta"><span>Modelo <strong id="connection-model">—</strong></span><span>Chave <strong>Protegida no Supabase</strong></span><span>Fluxo <strong>Consentimento + token usado</strong></span></div></div>
+        <div class="connection-toolbar"><div><span class="eyebrow">Consumo nesta aplicação</span><p id="usage-since">Os registros começam quando a medição é ativada.</p></div><label>Período<select id="usage-period"><option value="30">Últimos 30 dias</option><option value="7">Últimos 7 dias</option><option value="90">Últimos 90 dias</option><option value="all">Desde o início</option></select></label></div>
+        <p id="connection-message" class="admin-status" role="status" aria-live="polite"></p>
+        <div class="usage-metrics" aria-label="Indicadores de uso da IA">
+          <article class="admin-card"><span>Chamadas ao modelo</span><strong id="usage-requests">—</strong><small>Inclui respostas sem contagem disponível</small></article>
+          <article class="admin-card"><span>Leituras concluídas</span><strong id="usage-completed">—</strong><small>Texto válido retornado pelo modelo</small></article>
+          <article class="admin-card"><span>Tokens de entrada</span><strong id="usage-input">—</strong><small>Informados pela OpenAI API</small></article>
+          <article class="admin-card"><span>Tokens de saída</span><strong id="usage-output">—</strong><small>Inclui tokens não visíveis no texto</small></article>
+          <article class="admin-card"><span>Total registrado</span><strong id="usage-total">—</strong><small>Entrada + saída reportadas</small></article>
+          <article class="admin-card"><span>Falhas / sem retorno</span><strong id="usage-failed">—</strong><small id="usage-missing-note">Contagens indisponíveis são sinalizadas abaixo</small></article>
+        </div>
+        <p class="usage-breakdown">Dentro dos totais reportados: <strong id="usage-cached">—</strong> tokens de entrada em cache e <strong id="usage-reasoning">—</strong> tokens de raciocínio na saída. Esses valores já fazem parte de entrada/saída, não devem ser somados novamente.</p>
+        <section class="admin-card usage-chart-card"><div class="table-heading"><div><span class="eyebrow">Ritmo de uso</span><h2>Últimos 14 dias</h2></div><span class="table-count">Tokens reportados por dia · UTC</span></div><div id="usage-chart" class="usage-chart" role="img" aria-label="Consumo diário de tokens nos últimos 14 dias"></div></section>
+        <section class="admin-card admin-table-card"><div class="table-heading"><div><span class="eyebrow">Auditoria</span><h2>Chamadas recentes</h2></div><span class="table-count">Sem dados pessoais ou conteúdo das respostas</span></div><div class="admin-table-wrap"><table><thead><tr><th>Data</th><th>Modelo</th><th>Resultado</th><th>Entrada</th><th>Saída</th><th>Total</th></tr></thead><tbody id="usage-list"></tbody></table></div></section>
+        <div class="connection-footnote"><p><strong>Escopo:</strong> estes números cobrem apenas as chamadas desta aplicação registradas a partir da ativação da medição. Chamadas anteriores e outros projetos da conta não entram aqui. Requisições sem campo <code>usage</code> não contribuem para a soma de tokens; o valor não representa cobrança.</p><a href="https://platform.openai.com/usage" target="_blank" rel="noopener noreferrer">Ver uso e custos oficiais na OpenAI ↗</a></div>
+      </section>
+      </div>
     </section>
   </main>
   <dialog id="report-viewer" class="report-viewer"><div class="report-viewer-head"><strong>Prévia do laudo arquivado</strong><button id="close-report-viewer" class="secondary-button" type="button">Fechar</button></div><iframe id="report-frame" title="Laudo arquivado" sandbox="allow-scripts"></iframe></dialog>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-  <script src="portal-config.js?v=fit-2"></script><script src="portal.js?v=fit-2"></script><script src="admin.js?v=fit-1"></script>
+  <script src="portal-config.js?v=fit-2"></script><script src="portal.js?v=fit-2"></script><script src="admin-usage.js?v=connections-1"></script><script src="admin.js?v=connections-1"></script>
 </body></html>

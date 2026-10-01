@@ -44,6 +44,8 @@ node --test tests/*.test.cjs
 
 - `app.js`: questionario, pontuacao e persistencia.
 - `personalization.js`: textos contextuais e indice exploratorio do cargo.
+- `admin.html`, `admin.js` e `admin-usage.js`: gestao de acessos e painel
+  Conexoes com estado da integracao e consumo de tokens desta aplicacao.
 - `supabase/functions/personalize-report/index.ts`: redacao opcional via modelo,
   com verificacao do token consumido e arquivo HTML atualizado.
 - `spiral.js`: calculos exatos, empates e hipoteses editoriais dos cruzamentos.
@@ -65,6 +67,8 @@ Supabase. Nenhuma resposta e enviada ao GitHub. A chave legada
 Com consentimento e a funcao ativada, apenas respostas profissionais e totais
 das cores sao enviados para a OpenAI API; nome, e-mail, telefone e empresa nao
 entram no pedido ao modelo.
+O painel Conexoes soma apenas contadores `usage` reportados pela OpenAI API
+apos a ativacao do registro; nao mostra faturamento nem uso de outros projetos.
 
 Percentuais = pontos da cor / 120 * 100. Empates sao preservados. Cada bloco
 tem peso igual. Os cruzamentos exibem soma, diferenca e presenca conjunta;

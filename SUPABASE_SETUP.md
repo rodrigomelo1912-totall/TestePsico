@@ -38,3 +38,13 @@ do script deixam tokens e registros visíveis apenas para o e-mail administrativ
 A funcao usa `gpt-6-luna`, uma requisicao estruturada por laudo,
 `max_output_tokens` limitado e `store: false`. Ela envia apenas respostas
 profissionais resumidas e pontuacoes das cores, nunca contato ou nome.
+
+## Estatisticas no painel Conexoes
+
+Execute `supabase/migrations/20261001_ai_usage.sql` no SQL Editor e publique
+novamente a Edge Function `personalize-report`. Cada chamada ao modelo passa a
+registrar somente data, modelo, estado e os contadores de tokens devolvidos
+pela OpenAI API, sem prompt, resposta ou dados pessoais. O painel mostra esse
+uso desta aplicacao, desde a ativacao da medicao. Chamadas anteriores nao sao
+retroativas e falhas sem `usage` nao entram na soma de tokens. Para custos e
+consumo de toda a conta, consulte o painel oficial da OpenAI.
