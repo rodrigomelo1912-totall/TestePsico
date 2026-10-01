@@ -1,6 +1,7 @@
 const ProfilePortal = (() => {
   const config = window.PROFILE_PORTAL_CONFIG || {};
   const client = config.enabled && window.supabase ? window.supabase.createClient(config.url, config.publishableKey) : null;
+  let aiReady = false;
 
   async function submitToken(code, payload) {
     if (!client) throw new Error("O serviço de tokens ainda não está configurado.");
@@ -22,6 +23,21 @@ const ProfilePortal = (() => {
     return payload;
   }
 
+  async function checkAiAvailability() {
+    aiReady = false;
+    if (!client || !config.aiEnabled) return false;
+    try {
+      const response = await fetch(`${config.url}/functions/v1/personalize-report`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", apikey: config.publishableKey },
+        body: JSON.stringify({ action: "status" })
+      });
+      const payload = await response.json();
+      aiReady = response.ok && payload.ok && payload.aiEnabled === true;
+    } catch { aiReady = false; }
+    return aiReady;
+  }
+
   async function enrichToken(code) { return (await callPersonalization("generate", code)).reading; }
   async function archiveReport(code, html) { return callPersonalization("archive", code, html); }
 
@@ -39,5 +55,5 @@ const ProfilePortal = (() => {
 
   async function signOut() { await client?.auth.signOut(); }
   async function session() { return client ? (await client.auth.getSession()).data.session : null; }
-  return { config, client, submitToken, enrichToken, archiveReport, signIn, signUp, signOut, session };
+  return { config, client, submitToken, enrichToken, archiveReport, checkAiAvailability, get aiReady() { return aiReady; }, signIn, signUp, signOut, session };
 })();

@@ -84,6 +84,7 @@ Deno.serve(async request => {
   if (request.method !== "POST") return reply({ ok: false, message: "Método indisponível." }, 405);
   try {
     const body = await request.json();
+    if (body.action === "status") return reply({ ok: true, aiEnabled: !!Deno.env.get("OPENAI_API_KEY") });
     const code = typeof body.code === "string" ? body.code.trim().toUpperCase() : "";
     if (!/^VRM-(?:[A-HJ-NP-Z2-9]{4}-){3}[A-HJ-NP-Z2-9]{4}$/.test(code)) return reply({ ok: false, message: "Token inválido." }, 400);
     if (body.action === "generate") {

@@ -135,11 +135,14 @@ function openContactDialog() {
   $("contact-company").value = state.profile.company || "";
   $("contact-job-title").value = state.profile.jobTitle || state.profile.roleArea || "";
   $("contact-token").value = "";
-  $("analysis-consent").closest("label").hidden = !ProfilePortal.config.aiEnabled;
+  $("analysis-consent").closest("label").hidden = true;
   $("analysis-consent").checked = false;
   $("contact-token-message").textContent = "";
   $("contact-dialog").showModal();
   $("contact-name").focus();
+  ProfilePortal.checkAiAvailability().then(available => {
+    if ($("contact-dialog").open) $("analysis-consent").closest("label").hidden = !available;
+  });
 }
 
 function restore() {
@@ -398,7 +401,7 @@ $('contact-form').addEventListener("submit", async event => {
   state.profile.phone = $("contact-phone").value.trim();
   state.profile.company = $("contact-company").value.trim();
   state.profile.jobTitle = $("contact-job-title").value.trim();
-  state.profile.aiConsent = ProfilePortal.config.aiEnabled && $("analysis-consent").checked;
+  state.profile.aiConsent = ProfilePortal.aiReady && $("analysis-consent").checked;
   state.personalizedText = null;
   const code = $("contact-token").value.trim();
   try {
