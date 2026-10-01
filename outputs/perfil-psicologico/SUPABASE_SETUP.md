@@ -2,7 +2,8 @@
 
 1. No Supabase, abra **SQL Editor** e crie uma nova consulta.
 2. Copie todo o conteúdo de `supabase-schema.sql`, cole no editor e clique em
-   **Run**.
+   **Run**. O script pode ser executado novamente para atualizar instalações já
+   existentes.
 3. Abra o painel em `admin.html` e use:
 
    - E-mail: `rodrigomelo1912@gmail.com`

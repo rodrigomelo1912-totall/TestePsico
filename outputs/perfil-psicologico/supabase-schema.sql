@@ -9,6 +9,17 @@ create table if not exists public.profile_tokens (
   used_at timestamptz
 );
 
+create table if not exists public.profile_token_batches (
+  id uuid primary key default gen_random_uuid(),
+  recipient_name text not null,
+  company text not null,
+  quantity integer not null check (quantity between 1 and 100),
+  created_at timestamptz not null default now()
+);
+
+alter table public.profile_tokens
+  add column if not exists batch_id uuid references public.profile_token_batches(id);
+
 create table if not exists public.profile_submissions (
   id uuid primary key default gen_random_uuid(),
   token_id uuid not null unique references public.profile_tokens(id),
@@ -23,12 +34,20 @@ create table if not exists public.profile_submissions (
 );
 
 alter table public.profile_tokens enable row level security;
+alter table public.profile_token_batches enable row level security;
 alter table public.profile_submissions enable row level security;
 
+drop policy if exists "admin manages tokens" on public.profile_tokens;
 create policy "admin manages tokens" on public.profile_tokens for all to authenticated
   using ((auth.jwt() ->> 'email') = 'rodrigomelo1912@gmail.com')
   with check ((auth.jwt() ->> 'email') = 'rodrigomelo1912@gmail.com');
 
+drop policy if exists "admin manages token batches" on public.profile_token_batches;
+create policy "admin manages token batches" on public.profile_token_batches for all to authenticated
+  using ((auth.jwt() ->> 'email') = 'rodrigomelo1912@gmail.com')
+  with check ((auth.jwt() ->> 'email') = 'rodrigomelo1912@gmail.com');
+
+drop policy if exists "admin reads submissions" on public.profile_submissions;
 create policy "admin reads submissions" on public.profile_submissions for select to authenticated
   using ((auth.jwt() ->> 'email') = 'rodrigomelo1912@gmail.com');
 
