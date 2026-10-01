@@ -69,6 +69,7 @@ const state = {
   },
   introCurrent: 0,
   current: 0,
+  personalizedText: null,
   answers: QUESTIONS.map(() => Object.fromEntries(Object.keys(COLORS).map(key => [key, 0])))
 };
 
@@ -134,6 +135,8 @@ function openContactDialog() {
   $("contact-company").value = state.profile.company || "";
   $("contact-job-title").value = state.profile.jobTitle || state.profile.roleArea || "";
   $("contact-token").value = "";
+  $("analysis-consent").closest("label").hidden = !ProfilePortal.config.aiEnabled;
+  $("analysis-consent").checked = false;
   $("contact-token-message").textContent = "";
   $("contact-dialog").showModal();
   $("contact-name").focus();
@@ -216,6 +219,7 @@ function updatePoints(total = blockTotal()) {
 
 function updateScore(code, value) {
   state.answers[state.current][code] = Math.max(0, Math.min(12, Math.round(Number(value) || 0)));
+  state.personalizedText = null;
   persist();
   renderQuestion();
 }
@@ -254,7 +258,28 @@ function renderResults() {
     <p>${item.meaning}</p><p class="level-evidence">${item.points} pontos no total; pontuação positiva em ${item.present} de 10 blocos. Variação por bloco: ${item.min} a ${item.max} pontos.</p>
     <p>${item.points ? `Pergunta de reflexão: ${item.question}` : "Não recebeu pontos nesta aplicação. Isso não comprova ausência desse recurso na sua vida."}</p>
   </article>`).join("");
+  const reading = state.personalizedText || buildProfessionalReading(profile, state.profile);
+  renderRoleFit(profile, state.profile, reading);
+  renderPersonalizedNotes(reading);
   persist();
+}
+
+async function buildStandaloneReportHTML() {
+  const report = $("results-screen").cloneNode(true);
+  report.classList.add("active");
+  report.querySelectorAll(".report-nav, dialog, .result-actions, .analysis-status").forEach(node => node.remove());
+  report.querySelectorAll("#role-fit details").forEach(node => { node.open = true; });
+  const css = document.querySelector('link[href*="styles.css"]')?.href || "styles.css";
+  const inlineImage = async image => {
+    try {
+      const response = await fetch(image.src);
+      const blob = await response.blob();
+      image.src = await new Promise(resolve => { const reader = new FileReader(); reader.onload = () => resolve(reader.result); reader.readAsDataURL(blob); });
+    } catch { /* The report remains usable even when an optional image cannot be embedded. */ }
+  };
+  await Promise.all([...report.querySelectorAll("img[src]")].map(inlineImage));
+  const styles = await fetch(css).then(response => response.text());
+  return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Perfil Psicológico | Verium</title><style>${styles}</style></head><body class="report-mode"><main>${report.outerHTML}</main><script>(${initializeDeepMap.toString()})();<\/script></body></html>`;
 }
 
 function renderDonut(data, title) {
@@ -328,6 +353,7 @@ $("options-list").addEventListener("input", (event) => {
   const code = event.target.dataset.code;
   const value = Math.max(0, Math.min(12, Math.round(Number(event.target.value) || 0)));
   state.answers[state.current][code] = value;
+  state.personalizedText = null;
   event.target.closest(".option-row").classList.toggle("has-value", value > 0);
   updatePoints();
   persist();
@@ -357,7 +383,7 @@ $("next-button").addEventListener("click", () => {
   }
 });
 
-$("contact-form").addEventListener("submit", event => {
+$('contact-form').addEventListener("submit", async event => {
   event.preventDefault();
   if (!event.currentTarget.reportValidity()) return;
   if (!ProfilePortal?.client) {
@@ -372,24 +398,48 @@ $("contact-form").addEventListener("submit", event => {
   state.profile.phone = $("contact-phone").value.trim();
   state.profile.company = $("contact-company").value.trim();
   state.profile.jobTitle = $("contact-job-title").value.trim();
-  ProfilePortal.submitToken($("contact-token").value, {
-    name: state.profile.name,
-    email: state.profile.email,
-    phone: state.profile.phone,
-    company: state.profile.company,
-    jobTitle: state.profile.jobTitle,
-    profile: state.profile,
-    answers: state.answers
-  }).then(result => {
+  state.profile.aiConsent = ProfilePortal.config.aiEnabled && $("analysis-consent").checked;
+  state.personalizedText = null;
+  const code = $("contact-token").value.trim();
+  try {
+    renderResults();
+    const reportHtml = await buildStandaloneReportHTML();
+    const result = await ProfilePortal.submitToken(code, {
+      name: state.profile.name,
+      email: state.profile.email,
+      phone: state.profile.phone,
+      company: state.profile.company,
+      jobTitle: state.profile.jobTitle,
+      profile: state.profile,
+      answers: state.answers,
+      reportHtml,
+      aiConsent: state.profile.aiConsent
+    });
     state.profile.tokenHint = result.tokenHint;
     $("header-person").textContent = state.profile.name;
     persist();
     $("contact-dialog").close();
     renderResults();
     showScreen("results-screen");
-  }).catch(error => {
+    if (state.profile.aiConsent) {
+      $("ai-status").textContent = "Aprofundando a leitura com base nas suas respostas...";
+      ProfilePortal.enrichToken(code).then(async generated => {
+        applyGeneratedReading(generated);
+        state.personalizedText = generated;
+        persist();
+        try {
+          await ProfilePortal.archiveReport(code, await buildStandaloneReportHTML());
+          $("ai-status").textContent = "Leitura complementar integrada ao relatório e arquivada no painel.";
+        } catch {
+          $("ai-status").textContent = "Leitura complementar integrada. O painel mantém a versão inicial do laudo.";
+        }
+      }).catch(() => {
+        $("ai-status").textContent = "A leitura complementar não ficou disponível. O relatório baseado nas respostas permanece completo.";
+      });
+    }
+  } catch (error) {
     $("contact-token-message").textContent = error.message || "Não foi possível validar este token.";
-  }).finally(() => { submit.disabled = false; });
+  } finally { submit.disabled = false; }
 });
 
 $("save-exit").addEventListener("click", () => { persist(); showScreen("welcome-screen"); });
@@ -397,26 +447,19 @@ $("review-button").addEventListener("click", () => { state.current = 0; renderQu
 $("export-button").addEventListener("click", () => $("export-dialog").showModal());
 $("close-export").addEventListener("click", () => $("export-dialog").close());
 $("export-pdf").addEventListener("click", () => { $("export-dialog").close(); window.print(); });
-$("export-html").addEventListener("click", () => {
-  const report = $("results-screen").cloneNode(true);
-  report.classList.add("active");
-  report.querySelectorAll(".report-nav, dialog, .result-actions").forEach(node => node.remove());
-  const css = document.querySelector('link[href*="styles.css"]')?.href || "styles.css";
-  const inlineImage = image => fetch(image.src).then(response => response.blob()).then(blob => new Promise(resolve => {
-    const reader = new FileReader(); reader.onload = () => resolve(reader.result); reader.readAsDataURL(blob);
-  }));
-  Promise.all([...report.querySelectorAll("img[src]")].map(async image => { image.src = await inlineImage(image); })).then(() => fetch(css)).then(response => response.text()).then(styles => {
-    const html = `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Perfil Psicológico | Verium</title><style>${styles}</style></head><body class="report-mode"><main>${report.outerHTML}</main><script>(${initializeDeepMap.toString()})();<\/script></body></html>`;
+$("export-html").addEventListener("click", async () => {
+  try {
+    const html = await buildStandaloneReportHTML();
     const blob = new Blob([html], { type: "text/html;charset=utf-8" });
     const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = "perfil-psicologico.html"; link.click();
     URL.revokeObjectURL(link.href); $("export-dialog").close();
-  });
+  } catch { alert("Não foi possível preparar o arquivo HTML."); }
 });
 $("export-image").addEventListener("click", async () => {
   const report = $("results-screen");
   const width = Math.min(1400, Math.max(900, report.scrollWidth));
   const clone = report.cloneNode(true); clone.querySelectorAll("dialog, .report-nav, .result-actions").forEach(node => node.remove());
-  const css = await fetch("styles.css?v=deep-dive-1").then(response => response.text());
+  const css = await fetch("styles.css?v=fit-1").then(response => response.text());
   const height = Math.max(1200, report.scrollHeight);
   const markup = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}"><foreignObject width="100%" height="100%"><div xmlns="http://www.w3.org/1999/xhtml"><style>${css}</style>${clone.outerHTML}</div></foreignObject></svg>`;
   const image = new Image(); image.onload = () => { const canvas = document.createElement("canvas"); canvas.width = width * 2; canvas.height = height * 2; canvas.getContext("2d").drawImage(image, 0, 0, canvas.width, canvas.height); const link = document.createElement("a"); link.download = "perfil-psicologico.png"; link.href = canvas.toDataURL("image/png"); link.click(); $("export-dialog").close(); }; image.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(markup)}`;

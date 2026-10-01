@@ -19,3 +19,22 @@ caracteres de um token já gerado; copie o código inteiro no momento da criaç�
 
 O projeto usa a Publishable Key no navegador. As regras de Row Level Security
 do script deixam tokens e registros visíveis apenas para o e-mail administrativo.
+
+## Leitura personalizada por IA (opcional)
+
+1. Execute novamente o `supabase-schema.sql`. Ele adiciona o HTML arquivado,
+   os campos de consentimento e as funcoes que permitem uma geracao por token.
+2. Configure `OPENAI_API_KEY` nos segredos de Edge Functions do Supabase. Essa
+   e uma chave da OpenAI API, separada dos creditos do ChatGPT ou do Codex.
+   Nunca a coloque em `portal-config.js`, HTML ou GitHub.
+3. Publique `supabase/functions/personalize-report/index.ts` como Edge Function
+   `personalize-report`. O `supabase/config.toml` ja define
+   `verify_jwt = false`; a funcao exige o codigo de um token usado com
+   consentimento e limita o numero de tentativas.
+4. So depois de confirmar o funcionamento, altere `aiEnabled` para `true` em
+   `portal-config.js` e publique o site. Antes disso, a personalizacao local
+   e o capitulo de fit continuam disponiveis sem chamada ao modelo.
+
+A funcao usa `gpt-6-luna`, uma requisicao estruturada por laudo,
+`max_output_tokens` limitado e `store: false`. Ela envia apenas respostas
+profissionais resumidas e pontuacoes das cores, nunca contato ou nome.

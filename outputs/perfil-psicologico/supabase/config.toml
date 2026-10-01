@@ -1,0 +1,2 @@
+[functions.personalize-report]
+verify_jwt = false

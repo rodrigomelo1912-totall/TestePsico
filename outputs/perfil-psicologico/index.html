@@ -7,7 +7,7 @@
   <meta name="theme-color" content="#0b1936">
   <title>Perfil Psicológico | Verium</title>
   <link rel="icon" href="assets/verium-symbol.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="styles.css?v=portal-1">
+  <link rel="stylesheet" href="styles.css?v=fit-1">
 </head>
 <body>
   <a class="skip-link" href="#main-content">Ir para o conteúdo</a>
@@ -29,7 +29,7 @@
         <li data-journey="3"><span class="journey-number">04</span><div>Seus valores<small id="journey-quiz-label">10 blocos de reflexão</small></div></li>
         <li data-journey="4"><span class="journey-number">↗</span><div>Seu perfil<small>Cores e cruzamentos</small></div></li>
       </ol>
-      <div class="sidebar-note"><svg viewBox="0 0 200 70" aria-hidden="true"><path d="M5 50 C45 50 35 15 80 15 S130 55 160 30 L195 6"/><circle r="4"><animateMotion dur="7s" repeatCount="indefinite" path="M5 50 C45 50 35 15 80 15 S130 55 160 30 L195 6"/></circle></svg><strong>Uma reflexão de cada vez.</strong><p>Considere como você age no cotidiano, não como gostaria de ser visto.</p><small>Suas respostas ficam neste navegador.</small></div>
+      <div class="sidebar-note"><svg viewBox="0 0 200 70" aria-hidden="true"><path d="M5 50 C45 50 35 15 80 15 S130 55 160 30 L195 6"/><circle r="4"><animateMotion dur="7s" repeatCount="indefinite" path="M5 50 C45 50 35 15 80 15 S130 55 160 30 L195 6"/></circle></svg><strong>Uma reflexão de cada vez.</strong><p>Considere como você age no cotidiano, não como gostaria de ser visto.</p><small>O resultado também fica arquivado no painel privado.</small></div>
     </aside>
   <main id="main-content" tabindex="-1">
     <section id="welcome-screen" class="screen active">
@@ -146,7 +146,7 @@
 
     <section id="results-screen" class="screen">
       <nav class="report-nav" aria-label="Capítulos do relatório">
-        <div class="report-nav-inner"><div class="report-links"><a href="#panorama">01 <span>Panorama</span></a><a href="#leitura">02 <span>Padrões</span></a><a href="#color-crossings">03 <span>Cruzamentos</span></a><a href="#deep-dive">04 <span>Deep Dive de Alinhamento</span></a><a href="#answer-evidence">05 <span>Respostas</span></a></div><div class="report-controls"><button id="export-button" class="primary-button" type="button">Exportar <span aria-hidden="true">↗</span></button></div></div>
+        <div class="report-nav-inner"><div class="report-links"><a href="#panorama">01 <span>Panorama</span></a><a href="#leitura">02 <span>Padrões</span></a><a href="#color-crossings">03 <span>Cruzamentos</span></a><a href="#deep-dive">04 <span>Deep Dive</span></a><a href="#answer-evidence">05 <span>Respostas</span></a><a href="#role-fit">06 <span>Fit com a Cadeira</span></a></div><div class="report-controls"><button id="export-button" class="primary-button" type="button">Exportar <span aria-hidden="true">↗</span></button></div></div>
         <div class="reading-progress" aria-hidden="true"><span id="reading-progress-fill"></span></div>
       </nav>
       <section class="report-cover">
@@ -206,6 +206,7 @@
         <section id="color-crossings" class="profile-chapter chapter"></section>
         <section id="deep-dive" class="profile-chapter chapter"></section>
         <section id="answer-evidence" class="profile-chapter chapter"></section>
+        <section id="role-fit" class="profile-chapter chapter"></section>
 
         <p class="disclaimer">Esta leitura é uma ferramenta de autoconhecimento e desenvolvimento, não um diagnóstico clínico ou psicológico.</p>
         <footer class="report-footer"><img src="assets/logo-verium.svg?v=rota2b-1" alt="Verium Rota2B / HUB" width="150" height="41"><p>Perfil psicológico · Espiral de Valores<br><span id="report-date"></span></p></footer>
@@ -218,7 +219,7 @@
     <div class="dialog-heading"><span class="eyebrow">Verium / O método</span><button id="close-method" class="secondary-button" type="button" aria-label="Fechar explicação">Fechar</button></div>
     <h2 id="method-title">Suas respostas. Seu mapa de valores.</h2>
     <ol class="method-list"><li><strong>Conte um pouco sobre você.</strong><p>As perguntas de apresentação registram seu contexto. Elas não alteram os resultados das cores.</p></li><li><strong>Distribua seus pontos.</strong><p>Dez blocos com seis afirmações. Distribua 12 pontos inteiros em cada bloco, totalizando 120. É permitido atribuir zero.</p></li><li><strong>Explore seu perfil.</strong><p>Veja a distribuição das cores, seus cruzamentos e as diferenças entre os temas. Todas as medidas vêm das pontuações do questionário.</p></li></ol>
-    <p class="privacy-note">As respostas são armazenadas apenas neste navegador. O relatório apoia desenvolvimento e não constitui laudo psicológico clínico.</p>
+    <p class="privacy-note">As respostas e os dados de contato são enviados ao painel privado para liberar e arquivar o resultado. Com sua autorização na etapa final, os relatos profissionais também podem ser usados para personalizar a redação por IA. O relatório apoia desenvolvimento e não constitui laudo psicológico clínico.</p>
   </dialog>
 
   <dialog id="export-dialog" class="export-dialog" aria-labelledby="export-title">
@@ -242,6 +243,7 @@
         <label class="contact-token">Token de acesso<input id="contact-token" name="contactToken" autocomplete="off" autocapitalize="characters" placeholder="VRM-XXXX-XXXX-XXXX-XXXX" required></label>
       </div>
       <p class="privacy-note">O token é liberado pela Verium Rota2B e pode ser usado uma única vez.</p>
+      <label class="analysis-consent"><input id="analysis-consent" type="checkbox"><span>Autorizo o uso das minhas respostas profissionais por um modelo de IA para aprofundar os textos do relatório. O resultado também funciona sem esta opção.</span></label>
       <p id="contact-token-message" class="contact-token-message" aria-live="polite"></p>
       <button id="contact-submit" class="primary-button contact-submit" type="submit">Ver meu resultado <span aria-hidden="true">→</span></button>
     </form>
@@ -261,11 +263,12 @@
   <script src="spiral.js?v=espiral-3"></script>
   <script src="dimension-mix.js?v=mix-contextual-1"></script>
   <script src="deep-themes.js?v=deep-map-2"></script>
-  <script src="deep-dive.js?v=deep-map-2"></script>
-  <script src="report.js?v=deep-dive-1"></script>
+  <script src="deep-dive.js?v=fit-1"></script>
+  <script src="report.js?v=fit-1"></script>
+  <script src="personalization.js?v=fit-1"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-  <script src="portal-config.js?v=portal-1"></script>
-  <script src="portal.js?v=portal-1"></script>
-  <script src="app.js?v=portal-1"></script>
+  <script src="portal-config.js?v=fit-1"></script>
+  <script src="portal.js?v=fit-1"></script>
+  <script src="app.js?v=fit-1"></script>
 </body>
 </html>

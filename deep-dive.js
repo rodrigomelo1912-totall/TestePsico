@@ -109,6 +109,9 @@ function renderDeepDive(profile, requested) {
     ${tieControl}${renderDeepMap(dive)}
     <div class="deep-topics">${dive.topics.map((topic, i) => `<details class="deep-topic" id="deep-${topic.id}" ${i === 0 ? "open" : ""}><summary><span class="deep-number">${String(i + 1).padStart(2, "0")}</span><span><strong>${escape(topic.title)}</strong><span class="deep-teaser">${escape(topic.teaser)}</span></span><span class="deep-plus" aria-hidden="true">+</span></summary><div class="deep-topic-body">${topic.parts.map(([label, text]) => `<section class="deep-part"><h4>${escape(label)}</h4><p>${escape(text)}</p></section>`).join("")}${topic.figures ? `<div class="deep-figures">${topic.figures.map(figure => `<article><h4>${escape(figure.name)}</h4><p>${escape(figure.action)}</p><p>${escape(figure.bridge)}</p><a href="${figure.url}" target="_blank" rel="noopener noreferrer">Ler na fonte: ${escape(figure.source)} ↗</a></article>`).join("")}</div>` : ""}${renderDeepThemeReading(topic.reading)}</div></details>`).join("")}</div>`;
   const pairSelect = $("deep-pair");
-  if (dive.ambiguous) pairSelect.addEventListener("change", event => renderDeepDive(profile, [...event.target.value]));
+  if (dive.ambiguous) pairSelect.addEventListener("change", event => {
+    renderDeepDive(profile, [...event.target.value]);
+    if (typeof renderPersonalizedNotes === "function") renderPersonalizedNotes(state.personalizedText || buildProfessionalReading(profile, state.profile));
+  });
   initializeDeepMap();
 }

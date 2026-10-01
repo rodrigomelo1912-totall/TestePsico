@@ -42,7 +42,7 @@ function renderTokens() {
     return matchesName && matchesCompany && (!state || token.status === state) && (!start || day >= start) && (!end || day <= end);
   });
   admin$("token-count").textContent = `${filtered.length} de ${allTokens.length}`;
-  admin$("token-list").innerHTML = filtered.length ? filtered.map(token => `<tr><td>${escapeAdmin(token.code_hint)}</td><td>${escapeAdmin(token.profile_token_batches?.recipient_name || "Não informado")}</td><td>${escapeAdmin(token.profile_token_batches?.company || "Não informada")}</td><td><span class="token-status ${escapeAdmin(token.status)}">${escapeAdmin(token.status)}</span></td><td>${new Date(token.created_at).toLocaleDateString("pt-BR")}</td><td>${token.used_at ? new Date(token.used_at).toLocaleDateString("pt-BR") : "—"}</td><td class="token-actions">${token.status === "active" ? `<button type="button" class="text-button" data-revoke="${token.id}">Revogar</button>` : ""}${token.status !== "used" ? `<button type="button" class="text-button danger-button" data-delete="${token.id}">Excluir</button>` : ""}</td></tr>`).join("") : "<tr><td colspan=7>Nenhum token corresponde aos filtros.</td></tr>";
+  admin$("token-list").innerHTML = filtered.length ? filtered.map(token => `<tr><td>${escapeAdmin(token.code_hint)}</td><td>${escapeAdmin(token.profile_token_batches?.recipient_name || "Não informado")}</td><td>${escapeAdmin(token.profile_token_batches?.company || "Não informada")}</td><td><span class="token-status ${escapeAdmin(token.status)}">${escapeAdmin(token.status)}</span></td><td>${new Date(token.created_at).toLocaleDateString("pt-BR")}</td><td>${token.used_at ? new Date(token.used_at).toLocaleDateString("pt-BR") : "—"}</td><td class="token-actions">${token.status === "active" ? `<button type="button" class="text-button" data-revoke="${token.id}">Revogar</button>` : ""}<button type="button" class="text-button danger-button" data-delete="${token.id}" data-used="${token.status === "used"}">Excluir</button></td></tr>`).join("") : "<tr><td colspan=7>Nenhum token corresponde aos filtros.</td></tr>";
 }
 
 async function loadDashboard() {
@@ -53,7 +53,7 @@ async function loadDashboard() {
   if (tokenError || submissionError) throw tokenError || submissionError;
   allTokens = tokens;
   renderTokens();
-  admin$("submission-list").innerHTML = submissions.length ? submissions.map(item => `<tr><td><strong>${escapeAdmin(item.name)}</strong><small>${escapeAdmin(item.email)}</small></td><td>${escapeAdmin(item.phone)}</td><td>${escapeAdmin(item.company)}</td><td>${escapeAdmin(item.job_title)}</td><td>${escapeAdmin(item.profile_tokens?.code_hint || "—")}</td><td>${new Date(item.submitted_at).toLocaleString("pt-BR")}</td></tr>`).join("") : "<tr><td colspan=6>Nenhum laudo liberado ainda.</td></tr>";
+  admin$("submission-list").innerHTML = submissions.length ? submissions.map(item => `<tr><td><strong>${escapeAdmin(item.name)}</strong><small>${escapeAdmin(item.email)}</small></td><td>${escapeAdmin(item.phone)}</td><td>${escapeAdmin(item.company)}</td><td>${escapeAdmin(item.job_title)}</td><td>${escapeAdmin(item.profile_tokens?.code_hint || "—")}</td><td>${new Date(item.submitted_at).toLocaleString("pt-BR")}</td><td><button class="text-button" type="button" data-open-report="${item.id}">Abrir</button><button class="text-button" type="button" data-download-report="${item.id}">Baixar</button></td></tr>`).join("") : "<tr><td colspan=7>Nenhum laudo liberado ainda.</td></tr>";
 }
 
 async function showDashboard() {
@@ -103,10 +103,10 @@ admin$("token-list").addEventListener("click", async event => {
   const id = event.target.dataset.revoke;
   const deleteId = event.target.dataset.delete;
   if (!id && !deleteId) return;
-  if (deleteId && !window.confirm("Excluir este token não utilizado? Esta ação não pode ser desfeita.")) return;
+  if (deleteId && !window.confirm(event.target.dataset.used === "true" ? "Excluir este token usado? O laudo HTML e os dados vinculados serão apagados definitivamente." : "Excluir este token? Esta ação não pode ser desfeita.")) return;
   const { error } = id
     ? await adminClient.from("profile_tokens").update({ status: "revoked" }).eq("id", id)
-    : await adminClient.from("profile_tokens").delete().eq("id", deleteId);
+    : await adminClient.rpc("delete_profile_token", { p_token_id: deleteId });
   if (error) return status(error.message, "error");
   await loadDashboard();
 });
@@ -114,6 +114,30 @@ for (const filterId of ["filter-name", "filter-company", "filter-status", "filte
 admin$("clear-token-filters").addEventListener("click", () => {
   for (const filterId of ["filter-name", "filter-company", "filter-status", "filter-start-date", "filter-end-date"]) admin$(filterId).value = "";
   renderTokens();
+});
+admin$("submission-list").addEventListener("click", async event => {
+  const id = event.target.dataset.openReport || event.target.dataset.downloadReport;
+  if (!id) return;
+  try {
+    const { data, error } = await adminClient.from("profile_submissions").select("report_html,profile_tokens(code_hint)").eq("id", id).single();
+    if (error) throw error;
+    if (!data.report_html) throw new Error("Este laudo ainda não tem um arquivo HTML arquivado.");
+    const url = URL.createObjectURL(new Blob([data.report_html], { type: "text/html;charset=utf-8" }));
+    if (event.target.dataset.openReport) {
+      admin$("report-frame").src = url;
+      admin$("report-viewer").showModal();
+    } else {
+      const link = document.createElement("a"); link.href = url; link.download = `laudo-${data.profile_tokens?.code_hint || "verium"}.html`; link.click();
+      window.setTimeout(() => URL.revokeObjectURL(url), 60000);
+    }
+  } catch (error) { status(error.message || "Não foi possível abrir o laudo.", "error"); }
+});
+admin$("close-report-viewer").addEventListener("click", () => admin$("report-viewer").close());
+admin$("report-viewer").addEventListener("close", () => {
+  const frame = admin$("report-frame");
+  const url = frame.src;
+  frame.removeAttribute("src");
+  if (url.startsWith("blob:")) URL.revokeObjectURL(url);
 });
 admin$("admin-logout").addEventListener("click", async () => { await ProfilePortal.signOut(); admin$("admin-dashboard").hidden = true; admin$("admin-login").hidden = false; });
 

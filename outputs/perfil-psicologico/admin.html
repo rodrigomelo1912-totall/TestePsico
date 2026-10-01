@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Painel de Tokens | Verium Rota2B</title>
-  <link rel="stylesheet" href="styles.css?v=admin-3">
+  <link rel="stylesheet" href="styles.css?v=fit-1">
 </head>
 <body class="admin-body">
   <main class="admin-shell">
@@ -17,9 +17,10 @@
       <div class="admin-title"><div><span class="eyebrow">Verium / Rota2B</span><h1>Gestão de acessos.</h1></div><button id="admin-logout" class="secondary-button" type="button">Sair</button></div>
       <div class="admin-grid"><section class="admin-card"><span class="eyebrow">Lote de tokens</span><h2>Libere novos laudos.</h2><p>Identifique para quem os acessos foram emitidos e gere um ou vários tokens de uma vez.</p><form id="token-batch-form" class="token-batch-form"><label>Nome de referência<input id="batch-recipient-name" autocomplete="name" placeholder="Ex.: Ana Silva" required></label><label>Empresa<input id="batch-company" autocomplete="organization" placeholder="Ex.: Empresa Exemplo" required></label><label>Quantidade de tokens<input id="batch-quantity" type="number" min="1" max="100" value="1" required></label><button id="new-token" class="primary-button" type="submit">Gerar tokens <span>+</span></button></form><div id="generated-token" class="generated-token" hidden></div><button id="copy-token" class="text-button" type="button" hidden>Copiar tokens</button></section><section class="admin-card"><span class="eyebrow">Registros</span><h2>Dados centralizados.</h2><p>Os contatos aparecem assim que um token é utilizado para liberar um laudo.</p></section></div>
       <section class="admin-card admin-table-card"><div class="table-heading"><div><span class="eyebrow">Controle</span><h2>Tokens emitidos</h2></div><span id="token-count" class="table-count"></span></div><div class="token-filters" aria-label="Filtros de tokens"><label>Nome<input id="filter-name" type="search" placeholder="Buscar referência"></label><label>Empresa<input id="filter-company" type="search" placeholder="Buscar empresa"></label><label>Status<select id="filter-status"><option value="">Todos</option><option value="active">Ativo</option><option value="used">Usado</option><option value="revoked">Revogado</option></select></label><label>De<input id="filter-start-date" type="date"></label><label>Até<input id="filter-end-date" type="date"></label><button id="clear-token-filters" class="secondary-button" type="button">Limpar</button></div><div class="admin-table-wrap"><table><thead><tr><th>Final</th><th>Referência</th><th>Empresa</th><th>Status</th><th>Emitido</th><th>Usado</th><th></th></tr></thead><tbody id="token-list"></tbody></table></div></section>
-      <section class="admin-card admin-table-card"><h2>Laudos liberados</h2><div class="admin-table-wrap"><table><thead><tr><th>Pessoa</th><th>Celular</th><th>Empresa</th><th>Cargo</th><th>Token</th><th>Data</th></tr></thead><tbody id="submission-list"></tbody></table></div></section>
+      <section class="admin-card admin-table-card"><h2>Laudos liberados</h2><div class="admin-table-wrap"><table><thead><tr><th>Pessoa</th><th>Celular</th><th>Empresa</th><th>Cargo</th><th>Token</th><th>Data</th><th>Resultado</th></tr></thead><tbody id="submission-list"></tbody></table></div></section>
     </section>
   </main>
+  <dialog id="report-viewer" class="report-viewer"><div class="report-viewer-head"><strong>Prévia do laudo arquivado</strong><button id="close-report-viewer" class="secondary-button" type="button">Fechar</button></div><iframe id="report-frame" title="Laudo arquivado" sandbox="allow-scripts"></iframe></dialog>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-  <script src="portal-config.js"></script><script src="portal.js"></script><script src="admin.js"></script>
+  <script src="portal-config.js?v=fit-1"></script><script src="portal.js?v=fit-1"></script><script src="admin.js?v=fit-1"></script>
 </body></html>
