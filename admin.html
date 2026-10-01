@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Painel de Tokens | Verium Rota2B</title>
+  <link rel="stylesheet" href="styles.css?v=admin-1">
+</head>
+<body class="admin-body">
+  <main class="admin-shell">
+    <header class="admin-header"><a class="brand" href="index.html"><img src="assets/logo-verium.svg?v=rota2b-1" alt="Verium Rota2B / HUB" width="184" height="50"></a><span>Painel de tokens e laudos</span></header>
+    <section id="admin-login" class="admin-card">
+      <span class="eyebrow">Acesso restrito</span><h1>Gerencie seus tokens.</h1><p>Entre para criar acessos e acompanhar os dados capturados antes da liberação dos laudos.</p>
+      <form id="admin-login-form"><label>E-mail<input id="admin-email" type="email" autocomplete="email" value="rodrigomelo1912@gmail.com" required></label><label>Senha<input id="admin-password" type="password" autocomplete="current-password" required></label><button class="primary-button" type="submit">Entrar <span>→</span></button></form>
+      <button id="admin-create-access" class="text-button" type="button">Criar meu acesso inicial</button><p id="admin-status" class="admin-status" aria-live="polite"></p>
+    </section>
+    <section id="admin-dashboard" hidden>
+      <div class="admin-title"><div><span class="eyebrow">Verium / Rota2B</span><h1>Gestão de acessos.</h1></div><button id="admin-logout" class="secondary-button" type="button">Sair</button></div>
+      <div class="admin-grid"><section class="admin-card"><span class="eyebrow">Tokens</span><h2>Libere um novo laudo.</h2><p>O token é válido para uma única pessoa e será consumido ao concluir o questionário.</p><button id="new-token" class="primary-button" type="button">Gerar token <span>+</span></button><div id="generated-token" class="generated-token" hidden></div><button id="copy-token" class="text-button" type="button">Copiar token</button></section><section class="admin-card"><span class="eyebrow">Registros</span><h2>Dados centralizados.</h2><p>Os contatos aparecem assim que um token é utilizado para liberar um laudo.</p></section></div>
+      <section class="admin-card admin-table-card"><h2>Tokens emitidos</h2><div class="admin-table-wrap"><table><thead><tr><th>Final</th><th>Status</th><th>Emitido</th><th>Usado</th><th></th></tr></thead><tbody id="token-list"></tbody></table></div></section>
+      <section class="admin-card admin-table-card"><h2>Laudos liberados</h2><div class="admin-table-wrap"><table><thead><tr><th>Pessoa</th><th>Celular</th><th>Empresa</th><th>Cargo</th><th>Token</th><th>Data</th></tr></thead><tbody id="submission-list"></tbody></table></div></section>
+    </section>
+  </main>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="portal-config.js"></script><script src="portal.js"></script><script src="admin.js"></script>
+</body></html>

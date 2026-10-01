@@ -133,6 +133,8 @@ function openContactDialog() {
   $("contact-phone").value = state.profile.phone || "";
   $("contact-company").value = state.profile.company || "";
   $("contact-job-title").value = state.profile.jobTitle || state.profile.roleArea || "";
+  $("contact-token").value = "";
+  $("contact-token-message").textContent = "";
   $("contact-dialog").showModal();
   $("contact-name").focus();
 }
@@ -358,16 +360,36 @@ $("next-button").addEventListener("click", () => {
 $("contact-form").addEventListener("submit", event => {
   event.preventDefault();
   if (!event.currentTarget.reportValidity()) return;
+  if (!ProfilePortal?.client) {
+    $("contact-token-message").textContent = "O serviço de tokens não está disponível neste momento.";
+    return;
+  }
+  const submit = $("contact-submit");
+  submit.disabled = true;
+  $("contact-token-message").textContent = "Validando token e preparando seu laudo...";
   state.profile.name = $("contact-name").value.trim();
   state.profile.email = $("contact-email").value.trim();
   state.profile.phone = $("contact-phone").value.trim();
   state.profile.company = $("contact-company").value.trim();
   state.profile.jobTitle = $("contact-job-title").value.trim();
-  $("header-person").textContent = state.profile.name;
-  persist();
-  $("contact-dialog").close();
-  renderResults();
-  showScreen("results-screen");
+  ProfilePortal.submitToken($("contact-token").value, {
+    name: state.profile.name,
+    email: state.profile.email,
+    phone: state.profile.phone,
+    company: state.profile.company,
+    jobTitle: state.profile.jobTitle,
+    profile: state.profile,
+    answers: state.answers
+  }).then(result => {
+    state.profile.tokenHint = result.tokenHint;
+    $("header-person").textContent = state.profile.name;
+    persist();
+    $("contact-dialog").close();
+    renderResults();
+    showScreen("results-screen");
+  }).catch(error => {
+    $("contact-token-message").textContent = error.message || "Não foi possível validar este token.";
+  }).finally(() => { submit.disabled = false; });
 });
 
 $("save-exit").addEventListener("click", () => { persist(); showScreen("welcome-screen"); });

@@ -7,7 +7,7 @@
   <meta name="theme-color" content="#0b1936">
   <title>Perfil Psicológico | Verium</title>
   <link rel="icon" href="assets/verium-symbol.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="styles.css?v=deep-map-2">
+  <link rel="stylesheet" href="styles.css?v=portal-1">
 </head>
 <body>
   <a class="skip-link" href="#main-content">Ir para o conteúdo</a>
@@ -239,9 +239,11 @@
         <label>Celular<input id="contact-phone" name="contactPhone" type="tel" autocomplete="tel" inputmode="tel" required></label>
         <label>Empresa<input id="contact-company" name="contactCompany" autocomplete="organization" required></label>
         <label>Cargo<input id="contact-job-title" name="contactJobTitle" autocomplete="organization-title" required></label>
+        <label class="contact-token">Token de acesso<input id="contact-token" name="contactToken" autocomplete="off" autocapitalize="characters" placeholder="VRM-XXXX-XXXX-XXXX-XXXX" required></label>
       </div>
-      <p class="privacy-note">Seus dados ficam salvos neste navegador junto das respostas.</p>
-      <button class="primary-button contact-submit" type="submit">Ver meu resultado <span aria-hidden="true">→</span></button>
+      <p class="privacy-note">O token é liberado pela Verium Rota2B e pode ser usado uma única vez.</p>
+      <p id="contact-token-message" class="contact-token-message" aria-live="polite"></p>
+      <button id="contact-submit" class="primary-button contact-submit" type="submit">Ver meu resultado <span aria-hidden="true">→</span></button>
     </form>
   </dialog>
 
@@ -261,6 +263,9 @@
   <script src="deep-themes.js?v=deep-map-2"></script>
   <script src="deep-dive.js?v=deep-map-2"></script>
   <script src="report.js?v=deep-dive-1"></script>
-  <script src="app.js?v=deep-map-2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="portal-config.js?v=portal-1"></script>
+  <script src="portal.js?v=portal-1"></script>
+  <script src="app.js?v=portal-1"></script>
 </body>
 </html>
