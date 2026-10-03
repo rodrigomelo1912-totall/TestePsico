@@ -441,24 +441,34 @@ $('contact-form').addEventListener("submit", async event => {
     $("header-person").textContent = state.profile.name;
     persist();
     $("contact-dialog").close();
-    renderResults();
-    showScreen("results-screen");
+    let aiMessage = "";
     if (state.profile.aiConsent) {
-      $("ai-status").textContent = "Aprofundando a leitura com base nas suas respostas...";
-      ProfilePortal.enrichToken(code).then(async generated => {
-        applyGeneratedReading(generated);
-        state.personalizedText = generated;
+      $("generation-dialog").showModal();
+      try {
+        const generated = await ProfilePortal.enrichToken(code);
+        const local = buildProfessionalReading(buildSpiralProfile(state.answers), state.profile);
+        state.personalizedText = { ...local, ...generated.reading };
+        applyGeneratedReading(state.personalizedText);
         persist();
+        renderResults();
+        aiMessage = generated.complete
+          ? "Leitura complementar integrada ao relatório."
+          : `Leitura complementar integrada em ${generated.sectionCount} de 6 seções; as demais seguem a análise local.`;
         try {
           await ProfilePortal.archiveReport(code, await buildStandaloneReportHTML());
-          $("ai-status").textContent = "Leitura complementar integrada ao relatório e arquivada no painel.";
+          aiMessage += " Versão atualizada arquivada no painel.";
         } catch {
-          $("ai-status").textContent = "Leitura complementar integrada. O painel mantém a versão inicial do laudo.";
+          aiMessage += " O painel mantém a versão inicial do laudo.";
         }
-      }).catch(() => {
-        $("ai-status").textContent = "A leitura complementar não ficou disponível. O relatório baseado nas respostas permanece completo.";
-      });
+      } catch {
+        aiMessage = "A leitura complementar não ficou disponível. O relatório baseado nas respostas permanece completo.";
+      } finally {
+        $("generation-dialog").close();
+      }
     }
+    renderResults();
+    $("ai-status").textContent = aiMessage;
+    showScreen("results-screen");
   } catch (error) {
     $("contact-token-message").textContent = error.message || "Não foi possível validar este token.";
   } finally { submit.disabled = false; }

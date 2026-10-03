@@ -15,6 +15,7 @@ const ProfilePortal = (() => {
     if (!client || !config.aiEnabled) throw new Error("A personalização por IA não está ativa.");
     const response = await fetch(`${config.url}/functions/v1/personalize-report`, {
       method: "POST",
+      signal: AbortSignal.timeout(action === "generate" ? 95000 : 30000),
       headers: { "Content-Type": "application/json", apikey: config.publishableKey },
       body: JSON.stringify({ action, code: code.trim().toUpperCase(), ...(html ? { html } : {}) })
     });
@@ -38,7 +39,7 @@ const ProfilePortal = (() => {
     return aiReady;
   }
 
-  async function enrichToken(code) { return (await callPersonalization("generate", code)).reading; }
+  async function enrichToken(code) { return callPersonalization("generate", code); }
   async function archiveReport(code, html) { return callPersonalization("archive", code, html); }
 
   async function signIn(email, password) {

@@ -62,7 +62,7 @@ test('invalid matrices are rejected before requesting AI text', () => {
   assert.throws(() => run('buildNarrativeBrief({}, answers)'), /matriz/);
 });
 
-test('narrative inspection rejects fabricated references and repeated prose', () => {
+test('narrative inspection flags unsupported references and salvages valid sections', () => {
   context.answers = rows({ E: 8, G: 4 });
   context.profile = { valuesConflict: 'Escolhi revisar o prazo', roleEnergy: 'Gosto de planejar e de executar' };
   const brief = run('buildNarrativeBrief(profile, answers)');
@@ -73,7 +73,21 @@ test('narrative inspection rejects fabricated references and repeated prose', ()
   }]));
   context.brief = brief;
   context.draft = draft;
-  const errors = run('inspectNarrative(draft, brief)');
-  assert.ok(errors.some(item => item.includes('referências inválidas')));
-  assert.ok(errors.some(item => item.includes('frase repetida')));
+  const result = run('inspectNarrative(draft, brief.plan)');
+  assert.ok(result.issues.some(item => item.includes('referencia_ignorada')));
+  assert.ok(result.issues.some(item => item.includes('repeticao')));
+  assert.equal(Object.keys(result.reading).length, 0);
+  draft.panorama.text = 'Uma leitura do contexto profissional permite reconhecer prioridades declaradas sem transformá-las em traços fixos. O relato descreve uma escolha concreta e pode orientar uma conversa sobre as condições de trabalho.';
+  const partial = run('inspectNarrative(draft, brief.plan)');
+  assert.equal(Object.keys(partial.reading).length, 1);
+});
+
+test('the AI loading state holds the report until generation settles', () => {
+  const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+  const app = fs.readFileSync(path.join(root, 'app.js'), 'utf8');
+  const portal = fs.readFileSync(path.join(root, 'portal.js'), 'utf8');
+  assert.match(html, /id="generation-dialog"[\s\S]*?Gerando Perfil Psicológico/);
+  assert.match(app, /\$\("generation-dialog"\)\.showModal\(\);[\s\S]*?await ProfilePortal\.enrichToken\(code\)/);
+  assert.match(app, /finally \{\s*\$\("generation-dialog"\)\.close\(\)/);
+  assert.match(portal, /AbortSignal\.timeout\(action === "generate" \? 95000 : 30000\)/);
 });

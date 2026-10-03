@@ -301,6 +301,14 @@ dialog::backdrop { background:#0b193699; backdrop-filter:blur(3px); }
 .contact-fields .contact-token { grid-column:1/-1; }
 .contact-submit { width:100%; justify-content:center; margin-top:5px; }
 .contact-token-message { min-height:22px; margin:0 0 12px; color:var(--accent); font-size:13px; }
+.generation-dialog { width:min(530px,92vw); text-align:center; padding:54px 38px; }
+.generation-dialog h2 { margin:15px 0; line-height:1.12; }
+.generation-dialog p { color:var(--ink-soft); line-height:1.6; }
+.generation-dialog .generation-note { font-size:12px; margin-top:22px; }
+.generation-mark { position:relative; width:86px; height:86px; margin:0 auto 30px; border:1px solid var(--line); border-radius:50%; animation:generation-spin 5s linear infinite; }
+.generation-mark span { position:absolute; top:50%; left:50%; width:12px; height:12px; border-radius:50%; background:var(--accent); transform:translate(-50%,-50%) rotate(var(--angle)) translateY(-34px); }
+.generation-mark span:nth-child(1) { --angle:0deg; } .generation-mark span:nth-child(2) { --angle:120deg; opacity:.6; } .generation-mark span:nth-child(3) { --angle:240deg; opacity:.3; }
+@keyframes generation-spin { to { transform:rotate(360deg); } }
 .admin-body { min-height:100vh; background:var(--paper); }
 .admin-shell { width:min(1180px,calc(100% - 48px)); margin:0 auto; padding:36px 0 70px; }
 .admin-header { display:flex; justify-content:space-between; align-items:center; gap:24px; margin-bottom:50px; color:var(--ink-soft); font-size:13px; }
