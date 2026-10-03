@@ -26,8 +26,9 @@
         <li class="active" data-journey="0"><span class="journey-number">01</span><div>Seu contexto<small>Cargo e responsabilidades</small></div></li>
         <li data-journey="1"><span class="journey-number">02</span><div>Suas decisões<small>Rotina e desafios</small></div></li>
         <li data-journey="2"><span class="journey-number">03</span><div>Seu horizonte<small>Forças e objetivos</small></div></li>
-        <li data-journey="3"><span class="journey-number">04</span><div>Seus valores<small id="journey-quiz-label">10 blocos de reflexão</small></div></li>
-        <li data-journey="4"><span class="journey-number">↗</span><div>Seu perfil<small>Cores e cruzamentos</small></div></li>
+        <li data-journey="3"><span class="journey-number">04</span><div>Na prática<small>Escolhas e relações</small></div></li>
+        <li data-journey="4"><span class="journey-number">05</span><div>Seus valores<small id="journey-quiz-label">10 blocos de reflexão</small></div></li>
+        <li data-journey="5"><span class="journey-number">↗</span><div>Seu perfil<small>Cores e cruzamentos</small></div></li>
       </ol>
       <div class="sidebar-note"><svg viewBox="0 0 200 70" aria-hidden="true"><path d="M5 50 C45 50 35 15 80 15 S130 55 160 30 L195 6"/><circle r="4"><animateMotion dur="7s" repeatCount="indefinite" path="M5 50 C45 50 35 15 80 15 S130 55 160 30 L195 6"/></circle></svg><strong>Uma reflexão de cada vez.</strong><p>Considere como você age no cotidiano, não como gostaria de ser visto.</p><small>O resultado também fica arquivado no painel privado.</small></div>
     </aside>
@@ -46,13 +47,13 @@
           </div>
         </div>
 
-        <form id="profile-form" class="glass-card intro-card">
+        <form id="profile-form" class="glass-card intro-card" novalidate>
           <div class="intro-progress">
             <div>
               <span class="step-label">Antes de começar</span>
-              <strong id="intro-progress-label">Etapa 1 de 3</strong>
+              <strong id="intro-progress-label">Etapa 1 de 4</strong>
             </div>
-            <div class="intro-dots" aria-hidden="true"><span class="active"></span><span></span><span></span></div>
+            <div class="intro-dots" aria-hidden="true"><span class="active"></span><span></span><span></span><span></span></div>
           </div>
           <h2 id="intro-title">Seu contexto profissional</h2>
 
@@ -101,12 +102,27 @@
             </label>
           </div>
 
+          <div class="intro-slide" data-intro-slide="3">
+            <label>
+              Conte uma situação recente em que duas coisas importantes para você no trabalho entraram em conflito. O que estava em jogo, o que você priorizou e qual foi a consequência?
+              <textarea id="values-conflict" name="valuesConflict" rows="4" placeholder="Descreva a situação, sua escolha e o que aconteceu depois" required></textarea>
+            </label>
+            <label>
+              Descreva uma ocasião em que você discordou de alguém no trabalho ou recebeu uma orientação com a qual não concordava. Como conduziu a conversa e o que aconteceu depois?
+              <textarea id="disagreement" name="disagreement" rows="4" placeholder="Conte como conversou e qual foi o desfecho, sem citar nomes" required></textarea>
+            </label>
+            <label>
+              Que parte do seu cargo mais desperta seu envolvimento e qual exige mais adaptação de você? Dê um exemplo de cada.
+              <textarea id="role-energy" name="roleEnergy" rows="4" placeholder="Uma atividade que envolve você e outra que pede adaptação" required></textarea>
+            </label>
+          </div>
+
           <div class="intro-actions">
             <button id="intro-previous" class="secondary-button" type="button" disabled>← Voltar</button>
             <button id="intro-next" class="primary-button" type="button">Avançar <span>→</span></button>
             <button id="intro-submit" class="primary-button" type="submit" hidden>Começar mapeamento <span>→</span></button>
           </div>
-          <p class="privacy-note">Não há resposta ideal. O ponto de partida é a sua experiência.</p>
+          <p class="privacy-note">Não há resposta ideal. Conte situações reais sem incluir nomes de terceiros ou dados sensíveis.</p>
         </form>
       </div>
     </section>

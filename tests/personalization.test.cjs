@@ -40,3 +40,13 @@ test('personal narratives change with open answers while color scores stay fixed
   assert.equal(run('profile.total'), 120);
   assert.equal(run('Object.values(first).every(text => !text.includes("undefined") && text.length > 70)'), true);
 });
+
+test('new episodes inform distinct sections of the local reading', () => {
+  const run = engine();
+  run('var profile = buildSpiralProfile(QUESTIONS.map(() => ({B:1,C:1,D:2,E:4,F:1,G:3})))');
+  run('var reading = buildProfessionalReading(profile, {roleArea:"Gerente", responsibilities:"Lidero operações", timeFocus:"Processos", valuesConflict:"Escolhi preservar o prazo e renegociar o escopo", disagreement:"Expliquei minha discordância em reunião", roleEnergy:"Gosto de planejar, mas preciso adaptar metas", challenge:"Conciliar áreas"})');
+  assert.match(run('reading.crossings'), /preservar o prazo/);
+  assert.match(run('reading.deepDive'), /discordância em reunião/);
+  assert.match(run('reading.fit'), /adaptar metas/);
+  assert.equal(run('reading.panorama.includes("discordância em reunião")'), false);
+});

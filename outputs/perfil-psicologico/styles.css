@@ -72,6 +72,7 @@ main:focus { outline:none; }
 .intro-slide.active { display:grid; grid-template-columns:1fr 1fr; gap:0 20px; animation:enter .35s ease both; }
 .intro-slide label:last-child { grid-column:1/-1; }
 .intro-slide[data-intro-slide="2"].active { grid-template-columns:1fr; }
+.intro-slide[data-intro-slide="3"].active { grid-template-columns:1fr; }
 label { display:grid; gap:8px; font-size:13px; font-weight:600; margin-bottom:20px; align-content:start; }
 input,textarea { width:100%; min-width:0; padding:12px 14px; border:1px solid #cdd5e3; border-radius:10px; background:white; color:var(--ink); font-size:14px; font-weight:400; transition:border .2s,box-shadow .2s; }
 textarea { resize:vertical; min-height:94px; }

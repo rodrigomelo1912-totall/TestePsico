@@ -65,6 +65,7 @@ const state = {
   profile: {
     name: "", roleArea: "", responsibilities: "", timeFocus: "", challenge: "",
     difficultDecision: "", pressure: "", strengthsDevelopment: "", goals: "",
+    valuesConflict: "", disagreement: "", roleEnergy: "",
     email: "", phone: "", company: "", jobTitle: ""
   },
   introCurrent: 0,
@@ -88,7 +89,7 @@ function showScreen(id) {
 }
 
 function updateJourney(screen = document.querySelector(".screen.active")?.id) {
-  const step = screen === "results-screen" ? 4 : screen === "quiz-screen" ? 3 : state.introCurrent;
+  const step = screen === "results-screen" ? 5 : screen === "quiz-screen" ? 4 : state.introCurrent;
   document.querySelectorAll("[data-journey]").forEach((item, index) => {
     item.classList.toggle("active", index === step);
     item.classList.toggle("done", index < step);
@@ -112,7 +113,10 @@ const profileFields = {
   difficultDecision: "difficult-decision",
   pressure: "pressure",
   strengthsDevelopment: "strengths-development",
-  goals: "goals"
+  goals: "goals",
+  valuesConflict: "values-conflict",
+  disagreement: "disagreement",
+  roleEnergy: "role-energy"
 };
 
 function captureProfile() {
@@ -154,7 +158,7 @@ function restore() {
       Object.assign(state, data);
       state.profile.roleArea ||= state.profile.role || "";
       state.profile.responsibilities ||= state.profile.roleContext || "";
-      state.introCurrent = Math.max(0, Math.min(2, state.introCurrent || 0));
+      state.introCurrent = Math.max(0, Math.min(3, state.introCurrent || 0));
       populateProfile();
       $("header-person").textContent = state.profile.name || "";
       renderIntro();
@@ -165,11 +169,11 @@ function restore() {
 function renderIntro() {
   document.querySelectorAll(".intro-slide").forEach((slide, index) => slide.classList.toggle("active", index === state.introCurrent));
   document.querySelectorAll(".intro-dots span").forEach((dot, index) => dot.classList.toggle("active", index === state.introCurrent));
-  $("intro-progress-label").textContent = `Etapa ${state.introCurrent + 1} de 3`;
-  $("intro-title").textContent = ["Seu contexto profissional", "Sua rotina e suas decisões", "Seu jeito de agir e seus objetivos"][state.introCurrent];
+  $("intro-progress-label").textContent = `Etapa ${state.introCurrent + 1} de 4`;
+  $("intro-title").textContent = ["Seu contexto profissional", "Sua rotina e suas decisões", "Seu jeito de agir e seus objetivos", "Suas escolhas na prática"][state.introCurrent];
   $("intro-previous").disabled = state.introCurrent === 0;
-  $("intro-next").hidden = state.introCurrent === 2;
-  $("intro-submit").hidden = state.introCurrent !== 2;
+  $("intro-next").hidden = state.introCurrent === 3;
+  $("intro-submit").hidden = state.introCurrent !== 3;
   updateJourney();
 }
 
@@ -319,6 +323,21 @@ function renderRadar(data) {
 $("profile-form").addEventListener("submit", (event) => {
   event.preventDefault();
   if (!validateIntroSlide()) return;
+  if (state.introCurrent < 3) {
+    captureProfile();
+    state.introCurrent++;
+    renderIntro();
+    persist();
+    return;
+  }
+  const incompleteSlide = [...document.querySelectorAll(".intro-slide")].findIndex(slide =>
+    [...slide.querySelectorAll("[required]")].some(field => !field.value.trim()));
+  if (incompleteSlide !== -1) {
+    state.introCurrent = incompleteSlide;
+    renderIntro();
+    validateIntroSlide();
+    return;
+  }
   captureProfile();
   $("header-person").textContent = state.profile.name;
   persist();
@@ -331,7 +350,7 @@ $("profile-form").addEventListener("input", persist);
 $("intro-next").addEventListener("click", () => {
   if (!validateIntroSlide()) return;
   captureProfile();
-  state.introCurrent = Math.min(2, state.introCurrent + 1);
+  state.introCurrent = Math.min(3, state.introCurrent + 1);
   renderIntro();
   persist();
 });
