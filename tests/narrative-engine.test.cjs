@@ -89,5 +89,11 @@ test('the AI loading state holds the report until generation settles', () => {
   assert.match(html, /id="generation-dialog"[\s\S]*?Gerando Perfil Psicológico/);
   assert.match(app, /\$\("generation-dialog"\)\.showModal\(\);[\s\S]*?await ProfilePortal\.enrichToken\(code\)/);
   assert.match(app, /finally \{\s*\$\("generation-dialog"\)\.close\(\)/);
-  assert.match(portal, /AbortSignal\.timeout\(action === "generate" \? 95000 : 30000\)/);
+  assert.match(portal, /AbortSignal\.timeout\(action === "generate" \? 145000 : 30000\)/);
+});
+
+test('complete readings get one grounded editorial pass with original retained on failure', () => {
+  assert.match(source, /const editorialModel = "gpt-6-sol"/);
+  assert.match(source, /if \(sectionCount === keys\.length\) \{[\s\S]*?requestNarrative\(brief, brief\.plan, \[\], reading\)/);
+  assert.match(source, /if \(Object\.keys\(edited\.reading\)\.length === keys\.length\) Object\.assign\(reading, edited\.reading\)/);
 });

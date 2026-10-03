@@ -15,7 +15,7 @@ const ProfilePortal = (() => {
     if (!client || !config.aiEnabled) throw new Error("A personalização por IA não está ativa.");
     const response = await fetch(`${config.url}/functions/v1/personalize-report`, {
       method: "POST",
-      signal: AbortSignal.timeout(action === "generate" ? 95000 : 30000),
+      signal: AbortSignal.timeout(action === "generate" ? 145000 : 30000),
       headers: { "Content-Type": "application/json", apikey: config.publishableKey },
       body: JSON.stringify({ action, code: code.trim().toUpperCase(), ...(html ? { html } : {}) })
     });
