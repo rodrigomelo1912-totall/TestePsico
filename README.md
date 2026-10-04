@@ -1,4 +1,4 @@
-# Verium | Perfil Psicologico
+# xField | Perfil Psicologico
 
 Aplicacao estatica de autoconhecimento profissional baseada na Espiral de Valores.
 
@@ -7,7 +7,7 @@ Aplicacao estatica de autoconhecimento profissional baseada na Espiral de Valore
 - Contexto profissional em tres etapas com tres perguntas cada.
 - Dez blocos com seis afirmacoes e soma obrigatoria de 12 pontos por bloco.
 - Letras e cores do gabarito ocultas durante o questionario.
-- Identidade visual Verium, com conteudo restrito ao questionario de valores.
+- Identidade visual xField, com conteudo restrito ao questionario de valores.
 - Matriz, radar, 15 cruzamentos de cores e mapa interativo dos dez blocos.
 - Deep Dive de Alinhamento: oito temas a partir das duas maiores pontuacoes,
   com empates explicitos, exemplos de comunicacao e leituras de cada cor e do mix.
@@ -56,9 +56,8 @@ node --test tests/*.test.cjs
   analogias historicas com fontes, sem atribuir perfis a figuras publicas.
 - `deep-themes.js`: perspectivas tematicas das seis cores e mapa interativo,
   inclusive no HTML exportado; pontuacoes por pergunta ficam na memoria de respostas.
-- `styles.css`: identidade Verium, layouts responsivos e impressao.
-- `assets/logo-verium-original.svg`: logo vetorial extraida do PDF fornecido.
-- `assets/logo-verium.svg`: composicao horizontal dos mesmos elementos vetoriais.
+- `styles.css`: identidade xField, layouts responsivos e impressao.
+- `assets/logo-xfield.png`: logo fornecida para a nova identidade.
 
 As respostas continuam salvas no navegador para permitir retomar o questionario.
 Ao consumir o token, dados de contato, respostas e laudo sao enviados ao projeto

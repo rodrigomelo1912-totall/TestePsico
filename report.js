@@ -1,4 +1,4 @@
-// Questionnaire-grounded profile report. Verium supplies the visual identity only.
+// Questionnaire-grounded profile report. xField supplies the visual identity only.
 let reportObserver;
 let motionPaused = false;
 let readingFrame = 0;

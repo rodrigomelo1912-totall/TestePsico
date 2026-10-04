@@ -203,7 +203,7 @@ admin$("submission-list").addEventListener("click", async event => {
       admin$("report-frame").src = url;
       admin$("report-viewer").showModal();
     } else {
-      const link = document.createElement("a"); link.href = url; link.download = `laudo-${data.profile_tokens?.code_hint || "verium"}.html`; link.click();
+      const link = document.createElement("a"); link.href = url; link.download = `laudo-${data.profile_tokens?.code_hint || "xfield"}.html`; link.click();
       window.setTimeout(() => URL.revokeObjectURL(url), 60000);
     }
   } catch (error) { status(error.message || "Não foi possível abrir o laudo.", "error"); }

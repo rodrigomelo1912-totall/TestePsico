@@ -286,7 +286,7 @@ async function buildStandaloneReportHTML() {
   };
   await Promise.all([...report.querySelectorAll("img[src]")].map(inlineImage));
   const styles = await fetch(css).then(response => response.text());
-  return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Perfil Psicológico | Verium</title><style>${styles}</style></head><body class="report-mode"><main>${report.outerHTML}</main><script>(${initializeDeepMap.toString()})();<\/script></body></html>`;
+  return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Perfil Psicológico | xField</title><style>${styles}</style></head><body class="report-mode"><main>${report.outerHTML}</main><script>(${initializeDeepMap.toString()})();<\/script></body></html>`;
 }
 
 function renderDonut(data, title) {

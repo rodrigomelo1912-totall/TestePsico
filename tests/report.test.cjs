@@ -4,6 +4,19 @@ const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
 
+test('xField branding covers the site, diagnosis, export and admin panel', () => {
+  const root = path.join(__dirname, '..');
+  const page = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+  const admin = fs.readFileSync(path.join(root, 'admin.html'), 'utf8');
+  const appSource = fs.readFileSync(path.join(root, 'app.js'), 'utf8');
+  assert.ok(fs.existsSync(path.join(root, 'assets/logo-xfield.png')));
+  assert.match(page, /class="cover-brand"[\s\S]*?logo-xfield\.png/);
+  assert.match(page, /class="report-footer"[\s\S]*?logo-xfield\.png/);
+  assert.match(admin, /logo-xfield\.png/);
+  assert.match(appSource, /<title>Perfil Psicológico \| xField<\/title>/);
+  for (const source of [page, admin, appSource]) assert.doesNotMatch(source, /Verium|logo-verium/i);
+});
+
 function app() {
   const nodes = new Map();
   const context = vm.createContext({
