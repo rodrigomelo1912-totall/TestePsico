@@ -15,9 +15,15 @@ function makeToken() {
   return `VRM-${groups.join("-")}`;
 }
 
+function adminErrorMessage(message) {
+  return /failed to fetch|networkerror|fetch failed|load failed/i.test(message)
+    ? "Não foi possível conectar ao Supabase. O projeto pode estar pausado ou a rede indisponível. Tente novamente; se persistir, verifique o estado do projeto no painel Supabase. Sua senha não foi validada."
+    : /invalid login credentials/i.test(message) ? "E-mail ou senha incorretos." : message;
+}
+
 function status(message, type = "") {
   const target = admin$(admin$("admin-dashboard").hidden ? "admin-status" : "dashboard-status");
-  target.textContent = message;
+  target.textContent = adminErrorMessage(message);
   target.className = `admin-status ${type}`;
 }
 
@@ -58,9 +64,9 @@ async function loadDashboard() {
 }
 
 async function showDashboard() {
+  await loadDashboard();
   admin$("admin-login").hidden = true;
   admin$("admin-dashboard").hidden = false;
-  await loadDashboard();
   await showAdminView(window.location.hash === "#conexoes" ? "connections" : "access", false);
 }
 
@@ -140,8 +146,12 @@ async function showAdminView(view, updateHash = true) {
 
 admin$("admin-login-form").addEventListener("submit", async event => {
   event.preventDefault();
+  const button = admin$("admin-login-form").querySelector('button[type="submit"]');
+  button.disabled = true;
+  status("Conectando ao painel...");
   try { await ProfilePortal.signIn(admin$("admin-email").value.trim(), admin$("admin-password").value); await showDashboard(); }
   catch (error) { status(error.message || "Não foi possível entrar.", "error"); }
+  finally { button.disabled = false; }
 });
 
 admin$("admin-create-access").addEventListener("click", async () => {
@@ -223,4 +233,4 @@ window.addEventListener("hashchange", () => {
 });
 admin$("admin-logout").addEventListener("click", async () => { await ProfilePortal.signOut(); admin$("admin-dashboard").hidden = true; admin$("admin-login").hidden = false; });
 
-ProfilePortal.session().then(current => { if (current) showDashboard().catch(error => status(error.message, "error")); });
+ProfilePortal.session().then(current => { if (current) showDashboard().catch(error => status(error.message, "error")); }).catch(error => status(error.message || "Não foi possível verificar a sessão.", "error"));

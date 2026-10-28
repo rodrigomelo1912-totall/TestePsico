@@ -9,6 +9,15 @@ const context = vm.createContext({ Date, Number, Math, Intl, String, Array });
 vm.runInContext(source, context);
 const run = expression => vm.runInContext(expression, context);
 
+test('admin login explains connectivity failures without blaming saved credentials', () => {
+  const admin = fs.readFileSync(path.join(__dirname, '..', 'admin.js'), 'utf8');
+  const isolated = vm.createContext({});
+  vm.runInContext(admin.slice(admin.indexOf('function adminErrorMessage'), admin.indexOf('function status')), isolated);
+  assert.match(vm.runInContext('adminErrorMessage("Failed to fetch")', isolated), /projeto pode estar pausado/);
+  assert.equal(vm.runInContext('adminErrorMessage("Invalid login credentials")', isolated), 'E-mail ou senha incorretos.');
+  assert.match(admin, /async function showDashboard\(\) \{\s*await loadDashboard\(\);\s*admin\$\("admin-login"\)\.hidden = true/);
+});
+
 test('usage periods preserve all-time and calculate limited windows', () => {
   assert.equal(run('usageSince("all", new Date("2026-10-01T12:00:00Z"))'), null);
   assert.equal(run('usageSince("7", new Date("2026-10-01T12:00:00Z"))'), '2026-09-24T12:00:00.000Z');
